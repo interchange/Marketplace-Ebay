@@ -6,6 +6,7 @@ use warnings FATAL => 'all';
 
 use HTTP::Thin;
 use HTTP::Request;
+use HTTP::Headers;
 use XML::LibXML;
 use XML::Compile::Schema;
 
@@ -50,14 +51,56 @@ The following are required for a successful API call.
 
 =head3 token
 
+=head3 site_id
+
+The id of the site. E.g., Germany is 77.
+
+L<https://developer.ebay.com/DevZone/merchandising/docs/Concepts/SiteIDToGlobalID.html>
+
+=head3 xsd_file
+
+Path to the XSD file with the eBay definitions.
+
+=head3 production
+
+Boolean. Default to false.
+
+By default, the API calls are done against the sandbox. Set it to true
+in production.
+
+=head3 endpoint
+
+Set lazily by the class depending on the C<production> value.
+
+=head3 compatibility_level
+
+The version of API and XSD used. Please keep this in sync with the XSD.
+
 =cut
 
 has developer_key =>   (is => 'ro', required => 1);
 has application_key => (is => 'ro', required => 1);
 has certificate_key => (is => 'ro', required => 1);
 has token =>           (is => 'ro', required => 1);
+has site_id =>         (is => 'ro', required => 1);
+
+# totally random, as per Net::eBay
+has compatibility_level => (is => 'ro',
+                          default => sub { '655' });
 
 has session_certificate => (is => 'lazy');
+has production => (is => 'ro', default => sub { 0 });
+has endpoint => (is => 'lazy');
+
+sub _build_endpoint {
+    my $self = shift;
+    if ($self->production) {
+        return 'https://api.ebay.com/ws/api.dll';
+    }
+    else {
+        return 'https://api.sandbox.ebay.com/ws/api.dll';
+    }
+}
 
 sub _build_session_certificate {
     my $self = shift;
@@ -81,21 +124,59 @@ sub _build_schema {
 
 =head2 api_call($name, \%data)
 
+Do the API call $name with payload in %data.
+
+=head2 prepare_xml($name, \%data)
+
+Create the XML document to send for the API call $name.
+
+=head2 show_xml_template($call)
+
+Utility for development. Show the expected structure for the API call $call.
+
 =cut
 
 sub api_call {
+    my ($self, $call, $data) = @_;
+    my $xml = $self->prepare_xml($call, $data);
+    my $headers = $self->_prepare_headers($call);
+    my $request = HTTP::Request->new(POST => $self->endpoint, $headers, $xml);
+    my $response = HTTP::Thin->new->request($request);
+    return $self->_parse_response($call, $response->content);
+}
 
+sub _parse_response {
+    my ($self, $call, $xml) = @_;
+    my $reader = $self->schema->compile(READER => $self->_xml_type($call,
+                                                                   'Response'));
+    return $reader->($xml);
+}
+
+
+
+sub _prepare_headers {
+    my ($self, $call) = @_;
+    my $headers = HTTP::Headers->new;
+    $headers->push_header('X-EBAY-API-COMPATIBILITY-LEVEL' => $self->compatibility_level);
+    $headers->push_header('X-EBAY-API-DEV-NAME' => $self->developer_key);
+    $headers->push_header('X-EBAY-API-APP-NAME' => $self->application_key);
+    $headers->push_header('X-EBAY-API-CERT-NAME' => $self->certificate_key);
+    $headers->push_header('X-EBAY-API-CALL-NAME' => $call);
+    $headers->push_header('X-EBAY-API-SITEID' => $self->site_id);
+    $headers->push_header('Content-Type' => 'text/xml');
+    return $headers;
 }
 
 sub show_xml_template {
-    my ($self, $call) = @_;
-    return $self->schema->template(PERL => $self->_xml_type($call),
+    my ($self, $call, $call_type) = @_;
+    return $self->schema->template(PERL => $self->_xml_type($call, $call_type),
                                    use_default_namespace => 1);
 }
 
 sub _xml_type {
-    my ($self, $call) = @_;
-    return '{urn:ebay:apis:eBLBaseComponents}' . $call . 'Request';
+    my ($self, $call, $call_type) = @_;
+    $call_type ||= 'Request';
+    return '{urn:ebay:apis:eBLBaseComponents}' . $call . $call_type;
 }
 
 sub prepare_xml {

@@ -17,6 +17,7 @@ plan tests => 4;
 
 my $ebay = Marketplace::Ebay->new(
                                   production => 0,
+                                  site_id => 77,
                                   developer_key => '1234',
                                   application_key => '6789',
                                   certificate_key => '6666',

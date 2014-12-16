@@ -29,3 +29,4 @@
 \.orig$
 \.rej$
 t/ebay\.xsd
+t/ebay.yml
