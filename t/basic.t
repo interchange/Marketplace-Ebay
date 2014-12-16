@@ -29,7 +29,7 @@ like $ebay->session_certificate, qr/;/, "Session created";
 ok($ebay->schema, "Schema found");
 
 my $xml = $ebay->prepare_xml('GeteBayOfficialTime');
-like $xml, qr{<GeteBayOfficialTimeRequest .*</GeteBayOfficialTimeRequest>},
+like $xml, qr{<GeteBayOfficialTimeRequest .*</GeteBayOfficialTimeRequest>}s,
   "XML looks ok";
 
 # print $ebay->show_xml_template("AddItem");
@@ -51,5 +51,6 @@ my $item = {
 
 $xml = $ebay->prepare_xml("AddItem", { Item => $item });
 
-like($xml, qr{<AddItemRequest .*eBayAuthToken.*</Item></AddItemRequest>},
+like($xml, qr{<AddItemRequest .*eBayAuthToken.*</Item>.*</AddItemRequest>}s,
      "XML produced");
+# print $xml;

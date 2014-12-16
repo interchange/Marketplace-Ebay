@@ -108,7 +108,8 @@ sub prepare_xml {
     my $write  = $self->schema->compile(WRITER => $type,
                                         use_default_namespace => 1);
     my $xml    = $write->($doc, $data);
-    return $xml->toString;
+    $doc->setDocumentElement($xml);
+    return $doc->toString(1);
 }
 
 
