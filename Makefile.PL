@@ -23,7 +23,7 @@ WriteMakefile(
                   'Moo' => 0,
                   'MooX::Types::MooseLike' => 0,
                   'HTTP::Request' => 0,
-                  'XML::LibXML::Document' => 0,
+                  'XML::LibXML' => 0,
                  },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'Marketplace-Ebay-*' },
