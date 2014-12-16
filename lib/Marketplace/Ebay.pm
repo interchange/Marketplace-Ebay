@@ -77,6 +77,11 @@ Set lazily by the class depending on the C<production> value.
 
 The version of API and XSD used. Please keep this in sync with the XSD.
 
+=head3 last_response
+
+You can get the HTTP::Response object of the last call using this
+accessor.
+
 =cut
 
 has developer_key =>   (is => 'ro', required => 1);
@@ -92,6 +97,8 @@ has compatibility_level => (is => 'ro',
 has session_certificate => (is => 'lazy');
 has production => (is => 'ro', default => sub { 0 });
 has endpoint => (is => 'lazy');
+
+has last_response => (is => 'rwp');
 
 sub _build_endpoint {
     my $self = shift;
@@ -125,7 +132,12 @@ sub _build_schema {
 
 =head2 api_call($name, \%data)
 
-Do the API call $name with payload in %data.
+Do the API call $name with payload in %data. Return the data structure
+of the parsed response. In case of failure, return nothing. In this
+case, you can inspect the details of the failure inspecting, e.g.,
+
+  $self->last_response->status_line;
+
 
 =head2 prepare_xml($name, \%data)
 
@@ -145,7 +157,13 @@ sub api_call {
     my $headers = $self->_prepare_headers($call);
     my $request = HTTP::Request->new(POST => $self->endpoint, $headers, $xml);
     my $response = HTTP::Thin->new->request($request);
-    return $self->_parse_response($call, $response->content);
+    $self->_set_last_response($response);
+    if ($response->is_success) {
+        return $self->_parse_response($call, $response->content);
+    }
+    else {
+        return;
+    }
 }
 
 sub _parse_response {
