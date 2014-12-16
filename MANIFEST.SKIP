@@ -28,3 +28,4 @@
 # Avoid patch remnants
 \.orig$
 \.rej$
+t/ebay\.xsd
