@@ -9,6 +9,7 @@ use HTTP::Request;
 use HTTP::Headers;
 use XML::LibXML;
 use XML::Compile::Schema;
+use XML::Compile::Util qw/pack_type/;
 
 use Moo;
 use MooX::Types::MooseLike::Base qw(:all);
@@ -130,9 +131,11 @@ Do the API call $name with payload in %data.
 
 Create the XML document to send for the API call $name.
 
-=head2 show_xml_template($call)
+=head2 show_xml_template($call, $call_type)
 
-Utility for development. Show the expected structure for the API call $call.
+Utility for development. Show the expected structure for the API call
+$call. The second argument is optional, and may be Request or
+Response, defaulting to Request.
 
 =cut
 
@@ -176,7 +179,8 @@ sub show_xml_template {
 sub _xml_type {
     my ($self, $call, $call_type) = @_;
     $call_type ||= 'Request';
-    return '{urn:ebay:apis:eBLBaseComponents}' . $call . $call_type;
+    die unless ($call_type eq 'Request' or $call_type eq 'Response');
+    return pack_type('urn:ebay:apis:eBLBaseComponents', $call . $call_type);
 }
 
 sub prepare_xml {
