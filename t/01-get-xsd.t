@@ -10,7 +10,7 @@ use File::Spec;
 plan tests => 1;
 
 my $xsd = File::Spec->catfile(qw/t ebay.xsd/);
-my $url = 'http://developer.ebay.com/webservices/latest/ebaySvc.xsd';
+my $url = 'http://developer.ebay.com/webservices/901/ebaySvc.xsd';
 
 unless (-f $xsd) {
     my $res = HTTP::Tiny->new->mirror($url, $xsd);
