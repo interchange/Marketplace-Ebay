@@ -9,10 +9,10 @@ use Test::More;
 use Data::Dumper;
 
 # pulled in by XML::Compile
-use Log::Report  mode => "DEBUG";
+# use Log::Report  mode => "DEBUG";
 
 
-plan tests => 3;
+plan tests => 4;
 
 
 my $ebay = Marketplace::Ebay->new(
@@ -32,3 +32,24 @@ my $xml = $ebay->prepare_xml('GeteBayOfficialTime');
 like $xml, qr{<GeteBayOfficialTimeRequest .*</GeteBayOfficialTimeRequest>},
   "XML looks ok";
 
+# print $ebay->show_xml_template("AddItem");
+
+my $item = {
+            Country => "US",
+            Description => "Like new. Shipping is responsibility of the buyer.",
+            ListingDuration => "7",
+            Location => "Anytown, USA, 43215",
+            PictureDetails => {
+                               GalleryType => "Gallery",
+                               GalleryURL => 'http://example.org/test.jpg',
+                              },
+            BuyItNowPrice => { currencyID => 'EUR', _ => 19.99} ,
+            Quantity => "1",
+            Title => "Igor's Item with Gallery xaxa",
+           };
+
+
+$xml = $ebay->prepare_xml("AddItem", { Item => $item });
+
+like($xml, qr{<AddItemRequest .*eBayAuthToken.*</Item></AddItemRequest>},
+     "XML produced");

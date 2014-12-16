@@ -87,13 +87,24 @@ sub api_call {
 
 }
 
+sub show_xml_template {
+    my ($self, $call) = @_;
+    return $self->schema->template(PERL => $self->_xml_type($call),
+                                   use_default_namespace => 1);
+}
+
+sub _xml_type {
+    my ($self, $call) = @_;
+    return '{urn:ebay:apis:eBLBaseComponents}' . $call . 'Request';
+}
+
 sub prepare_xml {
     my ($self, $name, $data) = @_;
     $data ||= {};
     # inject the token
     $data->{RequesterCredentials}->{eBayAuthToken} = $self->token;
     my $doc    = XML::LibXML::Document->new('1.0', 'UTF-8');
-    my $type = '{urn:ebay:apis:eBLBaseComponents}' . $name . 'Request';
+    my $type = $self->_xml_type($name);
     my $write  = $self->schema->compile(WRITER => $type,
                                         use_default_namespace => 1);
     my $xml    = $write->($doc, $data);
