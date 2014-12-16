@@ -29,14 +29,20 @@ our $VERSION = '0.01';
 
 =head1 SYNOPSIS
 
-Quick summary of what the module does.
+  my $ebay = Marketplace::Ebay->new(
+                                    production => 0,
+                                    site_id => 77,
+                                    developer_key => '1234',
+                                    application_key => '6789',
+                                    certificate_key => '6666',
+                                    token => 'asd12348',
+                                    xsd_file => 'ebay.xsd',
+                                   );
+  my $res = $ebay->api_call('GeteBayOfficialTime', {});
+  print Dumper($res);
 
-Perhaps a little code snippet.
 
-    use Marketplace::Ebay;
-
-    my $foo = Marketplace::Ebay->new();
-    ...
+L<http://developer.ebay.com/Devzone/XML/docs/Concepts/MakingACall.html>
 
 =head1 ACCESSORS
 
