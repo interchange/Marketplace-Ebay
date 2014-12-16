@@ -20,6 +20,10 @@ WriteMakefile(
     PREREQ_PM => {
                   'HTTP::Thin' => 0,
                   'XML::Compile::Schema' => 0,
+                  'Moo' => 0,
+                  'MooX::Types::MooseLike' => 0,
+                  'HTTP::Request' => 0,
+                  'XML::LibXML::Document' => 0,
                  },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'Marketplace-Ebay-*' },

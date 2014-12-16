@@ -4,9 +4,18 @@ use 5.010001;
 use strict;
 use warnings FATAL => 'all';
 
+use HTTP::Thin;
+use HTTP::Request;
+use XML::LibXML;
+use XML::Compile::Schema;
+
+use Moo;
+use MooX::Types::MooseLike::Base qw(:all);
+use namespace::clean;
+
 =head1 NAME
 
-Marketplace::Ebay - The great new Marketplace::Ebay!
+Marketplace::Ebay - Making API calls to eBay (with XSD validation)
 
 =head1 VERSION
 
@@ -15,7 +24,6 @@ Version 0.01
 =cut
 
 our $VERSION = '0.01';
-
 
 =head1 SYNOPSIS
 
@@ -28,26 +36,70 @@ Perhaps a little code snippet.
     my $foo = Marketplace::Ebay->new();
     ...
 
-=head1 EXPORT
+=head1 ACCESSORS
 
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
+=head2 Credentials
 
-=head1 SUBROUTINES/METHODS
+The following are required for a successful API call.
 
-=head2 function1
+=head3 developer_key
 
-=cut
+=head3 application_key
 
-sub function1 {
-}
+=head3 certificate_key
 
-=head2 function2
+=head3 token
 
 =cut
 
-sub function2 {
+has developer_key =>   (is => 'ro', required => 1);
+has application_key => (is => 'ro', required => 1);
+has certificate_key => (is => 'ro', required => 1);
+has token =>           (is => 'ro', required => 1);
+
+has session_certificate => (is => 'lazy');
+
+sub _build_session_certificate {
+    my $self = shift;
+    return join(';',
+                $self->developer_key,
+                $self->application_key,
+                $self->certificate_key);
 }
+
+has xsd_file => (is => 'ro', required => 1);
+
+has schema => (is => 'lazy');
+
+sub _build_schema {
+    my $self = shift;
+    return XML::Compile::Schema->new($self->xsd_file);
+}
+
+
+=head1 METHODS
+
+=head2 api_call($name, \%data)
+
+=cut
+
+sub api_call {
+
+}
+
+sub prepare_xml {
+    my ($self, $name, $data) = @_;
+    $data ||= {};
+    # inject the token
+    $data->{RequesterCredentials}->{eBayAuthToken} = $self->token;
+    my $doc    = XML::LibXML::Document->new('1.0', 'UTF-8');
+    my $type = '{urn:ebay:apis:eBLBaseComponents}' . $name . 'Request';
+    my $write  = $self->schema->compile(WRITER => $type,
+                                        use_default_namespace => 1);
+    my $xml    = $write->($doc, $data);
+    return $xml->toString;
+}
+
 
 =head1 AUTHOR
 
