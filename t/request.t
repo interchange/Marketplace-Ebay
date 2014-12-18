@@ -12,7 +12,7 @@ use YAML qw/LoadFile/;
 my $config = File::Spec->catfile(qw/t ebay.yml/);
 
 if (-f $config) {
-    plan tests => 7;
+    plan tests => 9;
 }
 else {
     plan skip_all => "Missing $config file, cannot do a request";
@@ -43,4 +43,7 @@ is $res->{Ack}, "Success", "Call is ok";
 ok ($ebay->last_response);
 like $ebay->last_response->status_line, qr/200 OK/;
 
-diag Dumper($res);
+ok ($ebay->last_parsed_response->is_success, "api call ack ok")
+  or diag Dumper($ebay->last_parsed_response);
+
+ok ($ebay->last_parsed_response->version, "Got version");

@@ -10,6 +10,7 @@ use HTTP::Headers;
 use XML::LibXML;
 use XML::Compile::Schema;
 use XML::Compile::Util qw/pack_type/;
+use Marketplace::Ebay::Response;
 
 use Moo;
 use MooX::Types::MooseLike::Base qw(:all);
@@ -68,6 +69,8 @@ L<https://developer.ebay.com/DevZone/merchandising/docs/Concepts/SiteIDToGlobalI
 
 Path to the XSD file with the eBay definitions.
 
+http://developer.ebay.com/webservices/latest/ebaySvc.xsd
+
 =head3 production
 
 Boolean. Default to false.
@@ -88,6 +91,11 @@ The version of API and XSD used. Please keep this in sync with the XSD.
 You can get the HTTP::Response object of the last call using this
 accessor.
 
+=head3 last_parsed_response
+
+Return a L<Marketplace::Ebay::Response> object (or undef on failure)
+out of the return value of the last C<api_call>.
+
 =cut
 
 has developer_key =>   (is => 'ro', required => 1);
@@ -105,6 +113,7 @@ has production => (is => 'ro', default => sub { 0 });
 has endpoint => (is => 'lazy');
 
 has last_response => (is => 'rwp');
+has last_parsed_response => (is => 'rwp');
 
 sub _build_endpoint {
     my $self = shift;
@@ -165,9 +174,13 @@ sub api_call {
     my $response = HTTP::Thin->new->request($request);
     $self->_set_last_response($response);
     if ($response->is_success) {
-        return $self->_parse_response($call, $response->content);
+        my $struct = $self->_parse_response($call, $response->content);
+        my $obj = Marketplace::Ebay::Response->new(struct => $struct);
+        $self->_set_last_parsed_response($obj);
+        return $struct;
     }
     else {
+        $self->_set_last_parsed_response(undef);
         return;
     }
 }
