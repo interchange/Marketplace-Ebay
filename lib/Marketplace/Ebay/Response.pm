@@ -76,6 +76,15 @@ The EndTime (if any) of the response (auction end time)
 
 The timestamp of the response.
 
+=head2 errors
+
+The unmodified Errors structure
+
+=head2 errors_as_string
+
+A single string with the errors found in the response. If you need
+more detailed info, you have to inspect C<errors> yourself.
+
 =cut
 
 sub is_success {
@@ -112,6 +121,10 @@ sub timestamp {
     return shift->_get_struct_key('Timestamp');
 }
 
+sub errors {
+    return shift->_get_struct_key('Errors');
+}
+
 sub _get_struct_key {
     my ($self, $key) = @_;
     my $struct = $self->struct;
@@ -121,6 +134,36 @@ sub _get_struct_key {
     return;
 }
 
+sub errors_as_string {
+    my $self = shift;
+    if (my $errors = $self->errors) {
+        if (ref($errors) eq 'ARRAY') {
+            my @errors;
+            my $count = 0;
+            foreach my $error (@$errors) {
+                $count++;
+                my @err_details = ($count . '.');
+                foreach my $key (qw/SeverityCode
+                                    ErrorClassification
+                                    ErrorCode
+                                    ShortMessage
+                                    LongMessage/) {
+                    if (exists $error->{$key}) {
+                        if (defined $error->{$key}) {
+                            push @err_details, $error->{$key};
+                        }
+                    }
+                }
+                push @errors, join(' ', @err_details);
+            }
+            return join("\n", @errors) . "\n";
+        }
+        else {
+            die "Array expected! Please fix this code";
+        }
+    }
+    return;
+}
 
 =head2 fees
 

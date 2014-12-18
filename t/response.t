@@ -11,7 +11,7 @@ use Data::Dumper;
 # use Log::Report  mode => "DEBUG";
 
 
-plan tests => 12;
+plan tests => 16;
 
 
 my $ebay = Marketplace::Ebay->new(
@@ -524,5 +524,39 @@ is ($response->end_time, '2014-12-25T08:45:39.351Z', "stop_time ok");
 is ($response->timestamp, '2014-12-18T08:45:39.772Z', "timestamp ok");
 
 delete $struct->{Timestamp};
+$response = Marketplace::Ebay::Response->new(struct => $struct);
+
 is ($response->timestamp, undef, "now timestamp is not found");
 
+$struct = {
+           'Version' => '899',
+           'Timestamp' => '2014-12-18T10:18:43.819Z',
+           'Ack' => 'Failure',
+           'Errors' => [
+                        {
+                         'ErrorParameters' => [
+                                               {
+                                                'ParamID' => '0',
+                                                'Value' => 'Blab lbal bal'
+                                               },
+                                               {
+                                                'Value' => 'XXXXXXXX',
+                                                'ParamID' => '1'
+                                               }
+                                              ],
+                         'ErrorClassification' => 'RequestError',
+                         'LongMessage' => 'This Listing is a duplicate of your item: Blab lbal bal (XXXXXXXX). Under the Duplicate Listing policy, sellers can\'t have multiple Fixed Price listings, multiple Auction-style (with the Buy It Now option) listings, or in both the Fixed Price and Auction-style (with the Buy It Now option) listings for identical items at the same time. We recommend you create a multiple quantity Fixed Price listing to sell identical items.',
+                         'ShortMessage' => 'Listing violates the Duplicate Listing policy.',
+                         'SeverityCode' => 'Error',
+                         'ErrorCode' => '21919067'
+                        }
+                       ],
+           'Build' => 'E899_UNI_API5_17299296_R1'
+          };
+
+$response = Marketplace::Ebay::Response->new(struct => $struct);
+is_deeply($response->errors, $struct->{Errors}, "found errors");
+diag $response->errors_as_string;
+like $response->errors_as_string, qr/21919067/;
+like $response->errors_as_string, qr/Listing violates the Duplicate Listing policy/;
+like $response->errors_as_string, qr/This Listing is a duplicate of your item: Blab lbal bal/;
