@@ -60,6 +60,22 @@ Boolean.
 
 The API version of the remote site.
 
+=head2 item_id
+
+The ItemID (if any) of the response
+
+=head2 start_time
+
+The StartTime (if any) of the response (auction start time)
+
+=head2 end_time
+
+The EndTime (if any) of the response (auction end time)
+
+=head2 timestamp
+
+The timestamp of the response.
+
 =cut
 
 sub is_success {
@@ -77,13 +93,34 @@ sub is_success {
 }
 
 sub version {
-    my $self = shift;
+    return shift->_get_struct_key('Version');
+}
+
+sub item_id {
+    return shift->_get_struct_key('ItemID');
+}
+
+sub start_time {
+    return shift->_get_struct_key('StartTime');
+}
+
+sub end_time {
+    return shift->_get_struct_key('EndTime');
+}
+
+sub timestamp {
+    return shift->_get_struct_key('Timestamp');
+}
+
+sub _get_struct_key {
+    my ($self, $key) = @_;
     my $struct = $self->struct;
-    if (exists $struct->{Version}) {
-        return $struct->{Version};
+    if (exists $struct->{$key}) {
+        return $struct->{$key};
     }
     return;
 }
+
 
 =head2 fees
 
@@ -141,6 +178,7 @@ sub total_listing_fee {
     }
     return;
 }
+
 
 
 1;
