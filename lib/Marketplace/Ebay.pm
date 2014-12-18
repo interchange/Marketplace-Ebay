@@ -220,7 +220,8 @@ sub show_xml_template {
 sub _xml_type {
     my ($self, $call, $call_type) = @_;
     $call_type ||= 'Request';
-    die unless ($call_type eq 'Request' or $call_type eq 'Response');
+    die "Second argument must be Request or Response, defaulting to Request"
+      unless ($call_type eq 'Request' or $call_type eq 'Response');
     return pack_type('urn:ebay:apis:eBLBaseComponents', $call . $call_type);
 }
 
