@@ -174,22 +174,26 @@ sub api_call {
     my $response = HTTP::Thin->new->request($request);
     $self->_set_last_response($response);
     if ($response->is_success) {
-        my $struct = $self->_parse_response($call, $response->content);
-        my $obj = Marketplace::Ebay::Response->new(struct => $struct);
-        $self->_set_last_parsed_response($obj);
-        return $struct;
+        if (my $struct = $self->_parse_response($call, $response->content)) {
+            my $obj = Marketplace::Ebay::Response->new(struct => $struct);
+            $self->_set_last_parsed_response($obj);
+            return $struct;
+        }
     }
-    else {
-        $self->_set_last_parsed_response(undef);
-        return;
-    }
+    # fail
+    $self->_set_last_parsed_response(undef);
+    return;
 }
 
 sub _parse_response {
     my ($self, $call, $xml) = @_;
     my $reader = $self->schema->compile(READER => $self->_xml_type($call,
                                                                    'Response'));
-    return $reader->($xml);
+    my $struct;
+    eval {
+        $struct = $reader->($xml);
+    };
+    return $struct;
 }
 
 
