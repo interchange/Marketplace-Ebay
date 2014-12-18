@@ -4,6 +4,7 @@ use 5.010001;
 use strict;
 use warnings FATAL => 'all';
 
+use Data::Dumper;
 use Moo;
 use MooX::Types::MooseLike::Base qw(:all);
 use namespace::clean;
@@ -63,7 +64,7 @@ The API version of the remote site.
 
 sub is_success {
     my $self = shift;
-    my $struct = $self->struct or return;
+    my $struct = $self->struct;
     if (exists $struct->{Ack}) {
         if ($struct->{Ack} eq 'Success') {
             return 1;
@@ -77,12 +78,69 @@ sub is_success {
 
 sub version {
     my $self = shift;
-    my $struct = $self->struct or return;
+    my $struct = $self->struct;
     if (exists $struct->{Version}) {
         return $struct->{Version};
     }
+    return;
 }
 
+=head2 fees
+
+The fees detail returned by an add_item (or equivalent) call.
+
+=head2 total_listing_fee
+
+As per documentation: The total cost of all listing features is found
+in the Fees container whose Name is ListingFee. This does not reflect
+the full cost of listing and selling an item on eBay, for the Final
+Value Fee cannot be calculated by eBay until the listing has ended,
+when a final sale price is known. Total cost is then the sum of the
+Final Value Fee and the Fee corresponding to ListingFee.
+
+L<http://developer.ebay.com/DevZone/guides/ebayfeatures/Development/Listing-Fees.html>
+
+=cut
+
+sub fees {
+    my $self = shift;
+    my $struct = $self->struct;
+    if (exists $struct->{Fees}) {
+        if (exists $struct->{Fees}->{Fee}) {
+            my $fees = $struct->{Fees}->{Fee};
+            if ($fees && @$fees) {
+                my %out;
+                FEE: foreach my $fee (@$fees) {
+                      # we hope this structure is stable...
+                      foreach my $k (qw/Name Fee/) {
+                          unless (exists $fee->{$k}) {
+                              warn "$k not found in fee:" . Dumper($fee);
+                              next FEE;
+                          }
+                      }
+                      $out{$fee->{Name}} ||= 0;
+                      $out{$fee->{Name}} += $fee->{Fee}->{_};
+                  }
+                foreach my $k (keys %out) {
+                    my $float = $out{$k};
+                    $out{$k} = sprintf('%.2f', $float);
+                }
+                return \%out;
+            }
+        }
+    }
+    return;
+}
+
+sub total_listing_fee {
+    my $self = shift;
+    if (my $fees = $self->fees) {
+        if (exists $fees->{ListingFee}) {
+            return $fees->{ListingFee};
+        }
+    }
+    return;
+}
 
 
 1;
