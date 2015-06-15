@@ -10,6 +10,7 @@ use HTTP::Headers;
 use XML::LibXML;
 use XML::Compile::Schema;
 use XML::Compile::Util qw/pack_type/;
+# use XML::LibXML::Simple;
 use Marketplace::Ebay::Response;
 
 use Moo;
@@ -22,11 +23,11 @@ Marketplace::Ebay - Making API calls to eBay (with XSD validation)
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 SYNOPSIS
 
@@ -114,6 +115,8 @@ has endpoint => (is => 'lazy');
 
 has last_response => (is => 'rwp');
 has last_parsed_response => (is => 'rwp');
+has last_request => (is => 'rwp');
+has log_file => (is => 'rw');
 
 sub _build_endpoint {
     my $self = shift;
@@ -139,6 +142,8 @@ has schema => (is => 'lazy');
 
 sub _build_schema {
     my $self = shift;
+    my $xsd_file = $self->xsd_file;
+    die "$xsd_file is not a file" unless -f $xsd_file;
     return XML::Compile::Schema->new($self->xsd_file);
 }
 
@@ -171,17 +176,19 @@ sub api_call {
     my $xml = $self->prepare_xml($call, $data);
     my $headers = $self->_prepare_headers($call);
     my $request = HTTP::Request->new(POST => $self->endpoint, $headers, $xml);
+    $self->_set_last_request($request);
+    $self->log_event("Doing $call request\n" . $request->as_string);
     my $response = HTTP::Thin->new->request($request);
     $self->_set_last_response($response);
+    $self->log_event("Retrieving $call response\n" . $response->as_string);
+    $self->_set_last_parsed_response(undef);
     if ($response->is_success) {
-        if (my $struct = $self->_parse_response($call, $response->content)) {
+        if (my $struct = $self->_parse_response($call, $response->decoded_content)) {
             my $obj = Marketplace::Ebay::Response->new(struct => $struct);
             $self->_set_last_parsed_response($obj);
             return $struct;
         }
     }
-    # fail
-    $self->_set_last_parsed_response(undef);
     return;
 }
 
@@ -196,7 +203,15 @@ sub _parse_response {
     return $struct;
 }
 
-
+sub log_event {
+    my ($self, @strings);
+    if (my $file = $self->log_file) {
+        open (my $fh, '>>:encoding(UTF-8)', $file) or die "Cannot open $file $!";
+        my $now = "\n" . localtime . "\n";
+        print $fh $now, @strings;
+        close $fh or die "Cannot close $file $!";
+    }
+}
 
 sub _prepare_headers {
     my ($self, $call) = @_;
