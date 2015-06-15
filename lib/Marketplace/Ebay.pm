@@ -10,6 +10,7 @@ use HTTP::Headers;
 use XML::LibXML;
 use XML::Compile::Schema;
 use XML::Compile::Util qw/pack_type/;
+use Data::Dumper;
 # use XML::LibXML::Simple;
 use Marketplace::Ebay::Response;
 
@@ -173,6 +174,7 @@ Response, defaulting to Request.
 
 sub api_call {
     my ($self, $call, $data) = @_;
+    $self->log_event("Preparing call to $call for " . Dumper($data));
     my $xml = $self->prepare_xml($call, $data);
     my $headers = $self->_prepare_headers($call);
     my $request = HTTP::Request->new(POST => $self->endpoint, $headers, $xml);
@@ -186,6 +188,7 @@ sub api_call {
         if (my $struct = $self->_parse_response($call, $response->decoded_content)) {
             my $obj = Marketplace::Ebay::Response->new(struct => $struct);
             $self->_set_last_parsed_response($obj);
+            $self->log_event("Got response:" . Dumper($struct));
             return $struct;
         }
     }
@@ -204,9 +207,9 @@ sub _parse_response {
 }
 
 sub log_event {
-    my ($self, @strings);
+    my ($self, @strings) = @_;
     if (my $file = $self->log_file) {
-        open (my $fh, '>>:encoding(UTF-8)', $file) or die "Cannot open $file $!";
+        open (my $fh, '>>', $file) or die "Cannot open $file $!";
         my $now = "\n" . localtime . "\n";
         print $fh $now, @strings;
         close $fh or die "Cannot close $file $!";
