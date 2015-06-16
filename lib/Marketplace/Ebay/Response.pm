@@ -87,19 +87,35 @@ more detailed info, you have to inspect C<errors> yourself.
 
 =cut
 
+sub ack {
+    return shift->_get_struct_key('Ack');
+}
+
 sub is_success {
     my $self = shift;
-    my $struct = $self->struct;
-    if (exists $struct->{Ack}) {
-        if ($struct->{Ack} eq 'Success') {
-            return 1;
-        }
-        else {
-            return 0;
-        }
+    my $ack = $self->ack;
+    return unless $ack;
+    if ($ack eq 'Success') {
+        return 1;
     }
-    return;
+    else {
+        return 0;
+    }
 }
+
+sub is_warning {
+    my $self = shift;
+    my $ack = $self->ack;
+    return unless $ack;
+    if ($ack eq 'Warning') {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+
 
 sub version {
     return shift->_get_struct_key('Version');

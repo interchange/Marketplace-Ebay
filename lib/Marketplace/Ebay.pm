@@ -24,11 +24,11 @@ Marketplace::Ebay - Making API calls to eBay (with XSD validation)
 
 =head1 VERSION
 
-Version 0.02
+Version 0.03
 
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 =head1 SYNOPSIS
 
@@ -151,13 +151,18 @@ sub _build_schema {
 
 =head1 METHODS
 
-=head2 api_call($name, \%data)
+=head2 api_call($name, \%data, \%options)
 
 Do the API call $name with payload in %data. Return the data structure
-of the parsed response. In case of failure, return nothing. In this
-case, you can inspect the details of the failure inspecting, e.g.,
+of the L<Marketplace::Ebay::Response> object. In case of failure,
+return nothing. In this case, you can inspect the details of the
+failure inspecting, e.g.,
 
   $self->last_response->status_line;
+
+With option "requires_struct" set to a true value, the method doesn't
+return the object, but a plain hashref with the structure returned
+(old behaviour).
 
 
 =head2 prepare_xml($name, \%data)
@@ -173,7 +178,8 @@ Response, defaulting to Request.
 =cut
 
 sub api_call {
-    my ($self, $call, $data) = @_;
+    my ($self, $call, $data, $options) = @_;
+    $options ||= {};
     $self->log_event("Preparing call to $call for " . Dumper($data));
     my $xml = $self->prepare_xml($call, $data);
     my $headers = $self->_prepare_headers($call);
@@ -189,7 +195,12 @@ sub api_call {
             my $obj = Marketplace::Ebay::Response->new(struct => $struct);
             $self->_set_last_parsed_response($obj);
             $self->log_event("Got response:" . Dumper($struct));
-            return $struct;
+            if ($options->{requires_struct}) {
+                return $struct;
+            }
+            else {
+                return $obj;
+            }
         }
     }
     return;

@@ -12,7 +12,7 @@ use YAML qw/LoadFile/;
 my $config = File::Spec->catfile(qw/t ebay.yml/);
 
 if (-f $config) {
-    plan tests => 9;
+    plan tests => 11;
 }
 else {
     plan skip_all => "Missing $config file, cannot do a request";
@@ -38,7 +38,10 @@ is ($ebay->endpoint, 'https://api.sandbox.ebay.com/ws/api.dll')
 
 my $res = $ebay->api_call('GeteBayOfficialTime');
 ok($res);
-is $res->{Ack}, "Success", "Call is ok";
+is $res->struct->{Ack}, "Success", "Call is ok";
+ok $res->is_success;
+ok !$res->is_warning;
+
 
 ok ($ebay->last_response);
 like $ebay->last_response->status_line, qr/200 OK/;
