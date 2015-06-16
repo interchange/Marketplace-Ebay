@@ -11,7 +11,7 @@ use Data::Dumper;
 # use Log::Report  mode => "DEBUG";
 
 
-plan tests => 16;
+plan tests => 19;
 
 
 my $ebay = Marketplace::Ebay->new(
@@ -520,8 +520,11 @@ is_deeply($response->fees,
 is ($response->total_listing_fee, '0.35', "listing fee is 0.35");
 is ($response->item_id, '9999999', "item_id ok");
 is ($response->start_time, '2014-12-18T08:45:39.351Z', "start_time ok");
+is ($response->start_time_dt->ymd, '2014-12-18');
 is ($response->end_time, '2014-12-25T08:45:39.351Z', "stop_time ok");
+is ($response->end_time_dt->ymd, '2014-12-25');
 is ($response->timestamp, '2014-12-18T08:45:39.772Z', "timestamp ok");
+is ($response->timestamp_dt->ymd, '2014-12-18', "timestamp ok");
 
 delete $struct->{Timestamp};
 $response = Marketplace::Ebay::Response->new(struct => $struct);

@@ -7,6 +7,8 @@ use warnings FATAL => 'all';
 use Data::Dumper;
 use Moo;
 use MooX::Types::MooseLike::Base qw(:all);
+use DateTime;
+use DateTime::Format::ISO8601;
 use namespace::clean;
 
 =head1 NAME
@@ -129,13 +131,39 @@ sub start_time {
     return shift->_get_struct_key('StartTime');
 }
 
+sub start_time_dt {
+    return shift->_dt_from_string('start_time');
+}
+
 sub end_time {
     return shift->_get_struct_key('EndTime');
 }
 
+sub end_time_dt {
+    return shift->_dt_from_string('end_time');
+}
+
+sub _dt_from_string {
+    my ($self, $method) = @_;
+    if (my $string = $self->$method) {
+        return DateTime::Format::ISO8601->parse_datetime($string);
+    }
+    return;
+}
+
+sub sku {
+    shift->_get_struct_key('SKU');
+}
+
+
 sub timestamp {
     return shift->_get_struct_key('Timestamp');
 }
+
+sub timestamp_dt {
+    return shift->_dt_from_string('timestamp');
+}
+
 
 sub errors {
     return shift->_get_struct_key('Errors');
@@ -237,7 +265,6 @@ sub total_listing_fee {
     }
     return;
 }
-
 
 
 1;
