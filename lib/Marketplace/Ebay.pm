@@ -24,11 +24,11 @@ Marketplace::Ebay - Making API calls to eBay (with XSD validation)
 
 =head1 VERSION
 
-Version 0.05
+Version 0.06
 
 =cut
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 =head1 SYNOPSIS
 
@@ -268,6 +268,96 @@ sub prepare_xml {
     return $doc->toString(1);
 }
 
+=head1 CONVENIENCE METHODS
+
+=cut
+
+=head2 api_call_wrapper($call, $data, @ids)
+
+Call Ebay's API $call with data $data. Then check the response and
+return it. This ends calling $self->api_call($call, $data), but after
+that the response is checked and diagnostics are printed out. If you
+want something quiet and which is not going to die, or you're
+expecting invalid structures, you should use C<api_call> directly.
+
+Return the response object. If no response object is found, it will
+die.
+
+=cut
+
+sub api_call_wrapper {
+    my ($self, $call, $data, @identifiers) = @_;
+    my $res = $self->api_call($call, $data);
+    my $message = $call;
+    if (@identifiers) {
+        $message .= " on " . join(' ', @identifiers);
+    }
+    if ($res) {
+        if ($res->is_success) {
+            print "$message OK\n";
+        }
+        elsif ($res->errors) {
+            warn "$message:\n" . $res->errors_as_string;
+        }
+        else {
+            die "$message: Nor success, nor errors!" . Dumper($res);
+        }
+        if (my $item_id = $res->item_id) {
+            print "$message: ebay id: $item_id\n";
+        }
+        my $fee = $res->total_listing_fee;
+        if (defined $fee) {
+            print "$message Fee is $fee\n";
+        }
+    }
+    else {
+        die "No response found!" . $self->last_response->status_line
+          . "\n" . $self->last_response->content;
+    }
+    return $res;
+}
+
+=head2 cancel_item($identifier, $id, $reason)
+
+$identifier is mandatory and can be C<SKU> or C<ItemID> (depending if
+you do tracking by sku (this is possible only if the sku was uploaded
+with InventoryTrackingMethod = SKU) or by ebay item id. The $id is
+mandatory and is the sku or the ebay_id.
+
+Reason can be one of the following, defaulting to OtherListingError: Incorrect, LostOrBroken, NotAvailable, OtherListingError, SellToHighBidder, Sold.
+
+It calls EndFixedPriceItem, so this method is useful only for shops.
+
+=cut
+
+sub cancel_item {
+    my ($self, $key, $value, $reason) = @_;
+    die "Missing SKU or ItemID" unless $key;
+    my %mapping = (
+                   SKU => 'sku',
+                   ItemID => 'ebay_sku',
+                  );
+    my %reasons = (
+                   Incorrect => 1,
+                   LostOrBroken => 1,
+                   NotAvailable => 1,
+                   OtherListingError => 1,
+                   SellToHighBidder => 1,
+                   Sold => 1,
+                  );
+    die "Invalid key $key" unless $mapping{$key};
+    unless ($reason && $reasons{$reason}) {
+        $reason = 'OtherListingError';
+    }
+    die "Missing $key" unless $value;
+    my $res = $self
+      ->api_call_wrapper(EndFixedPriceItem => {
+                                               EndingReason => $reason,
+                                               ErrorLanguage => 'en_US',
+                                               $key => $value,
+                                              }, $key, $value);
+    return $res;
+}
 
 =head1 AUTHOR
 
