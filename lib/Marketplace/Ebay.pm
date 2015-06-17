@@ -359,6 +359,36 @@ sub cancel_item {
     return $res;
 }
 
+=head2 delete_sku_variations($sku, \@list_of_sku_variations)
+
+It uses ReviseFixedPriceItem to cancel variations of a given sku
+
+https://developer.ebay.com/DevZone/xml/docs/Reference/ebay/Samples/ReviseFixedPriceItem_variationsDeleteSKU_in_xml_xml.txt
+
+=cut
+
+sub delete_sku_variations {
+    my ($self, $sku, $list) = @_;
+    die unless $sku && $list;
+    my @delete = map { +{
+                         Delete => 1,
+                         SKU => $_,
+                        }  } @$list;
+    my $data = {
+                ErrorLanguage => 'en_US',
+                WarningLevel => 'High',
+                Item => {
+                         SKU => $sku,
+                         Variations => {
+                                        Variation => \@delete,
+                                       }
+                        },
+               };
+    my $res = $self->api_call_wrapper(ReviseFixedPriceItem => $data, $sku, "delete variations");
+    return $res;
+}
+
+
 =head1 AUTHOR
 
 Marco Pessotto, C<< <melmothx at gmail.com> >>
