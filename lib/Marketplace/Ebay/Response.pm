@@ -117,7 +117,27 @@ sub is_warning {
     }
 }
 
+sub is_failure {
+    my $self = shift;
+    my $ack = $self->ack;
+    return unless $ack;
+    if ($ack eq 'Failure' or $ack eq 'PartialFailure') {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
 
+sub request_ok {
+    my $self = shift;
+    if ($self->is_success || $self->is_warning) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
 
 sub version {
     return shift->_get_struct_key('Version');
