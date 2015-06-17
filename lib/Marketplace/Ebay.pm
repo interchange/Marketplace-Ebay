@@ -24,11 +24,11 @@ Marketplace::Ebay - Making API calls to eBay (with XSD validation)
 
 =head1 VERSION
 
-Version 0.07
+Version 0.08
 
 =cut
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 =head1 SYNOPSIS
 
@@ -385,6 +385,21 @@ sub delete_sku_variations {
                         },
                };
     my $res = $self->api_call_wrapper(ReviseFixedPriceItem => $data, $sku, "delete variations");
+    return $res;
+}
+
+=head2 get_category_specifics($id)
+
+Return a dump of the structure found in the GetCategorySpecifics
+
+=cut
+
+sub get_category_specifics {
+    my ($self, $id) = @_;
+    die "Missing category id" unless $id;
+    my $res = $self->api_call_wrapper(GetCategorySpecifics => {
+                                                               CategoryID => $id,
+                                                              }, "category id $id");
     return $res;
 }
 
