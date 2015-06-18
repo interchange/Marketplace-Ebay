@@ -7,8 +7,9 @@ use DateTime::Format::ISO8601;
 use Data::Dumper;
 
 use Moo;
-use MooX::Types::MooseLike::Base qw(:all);
+use MooX::Types::MooseLike::Base qw(Str HashRef);
 use Marketplace::Ebay::Order::Address;
+use Marketplace::Ebay::Order::Item;
 use namespace::clean;
 
 =head1 NAME
@@ -97,5 +98,43 @@ sub _build_shipping_address {
     my $address = $self->order->{ShippingAddress};
     return Marketplace::Ebay::Order::Address->new(%$address);
 }
+
+has items_ref => (is => 'lazy');
+
+sub orderline {
+    return shift->order->{TransactionArray}->{Transaction};
+}
+
+sub _build_items_ref {
+    my ($self) = @_;
+    my $orderline = $self->orderline;
+    my @items;
+    foreach my $item (@$orderline) {
+        # print Dumper($item);
+        push @items, Marketplace::Ebay::Order::Item->new(struct => $item);
+    }
+    return \@items;
+}
+
+sub items {
+    my $self = shift;
+    return @{ $self->items_ref };
+}
+
+sub order_date {
+    
+}
+
+sub email {
+    
+}
+
+sub first_name {
+    
+}
+sub last_name {
+    
+}
+
 
 1;

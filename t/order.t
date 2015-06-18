@@ -391,4 +391,9 @@ is ($address->zip, '48499');
 is ($address->phone, '');
 is ($address->country, 'DE');
 
+my ($item) = $order->items;
+is ($item->sku, '1030112-009000-110', "sku ok");
+is ($item->variant_sku, '1030112-009000-110', "variant sku ok");
+is ($item->canonical_sku, '1030112', "canonical ok");
+
 done_testing;
