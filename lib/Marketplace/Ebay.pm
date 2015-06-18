@@ -24,11 +24,11 @@ Marketplace::Ebay - Making API calls to eBay (with XSD validation)
 
 =head1 VERSION
 
-Version 0.08
+Version 0.09
 
 =cut
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 =head1 SYNOPSIS
 
@@ -401,6 +401,40 @@ sub get_category_specifics {
                                                                CategoryID => $id,
                                                               }, "category id $id");
     return $res;
+}
+
+=head2 get_orders($number_of_days)
+
+Retrieve the last orders in the last number of days, defaulting to 7.
+Return a list of orders with the OrderArray.Order structures.
+
+=cut
+
+sub get_orders {
+    my ($self, $backlog) = @_;
+    $backlog ||= 7;
+    my $request = {
+                   NumberOfDays => $backlog,
+                   Pagination => {
+                                  PageNumber => 1,
+                                  EntriesPerPage => 100,
+                                 },
+                   ErrorLanguage => 'en_US',
+                  };
+    my $repeat = 1;
+    my @orders;
+    do {
+        my $obj = $self->api_call_wrapper(GetOrders => $request);
+        my $res = $obj->struct;
+        if (exists $res->{OrderArray} and
+            exists $res->{OrderArray}->{Order}) {
+            push @orders, @{$res->{OrderArray}->{Order}};
+        }
+        $repeat = $res->{HasMoreOrders};
+        $request->{Pagination}->{PageNumber}++;
+    } while ($repeat);
+
+    return @orders;
 }
 
 
