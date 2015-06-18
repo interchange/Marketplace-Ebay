@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Test::More;
 use_ok ('Marketplace::Ebay::Order');
+use Math::BigFloat;
 
 my $struc = {
             'IntegratedMerchantCreditCardEnabled' => 0,
@@ -396,4 +397,8 @@ is ($item->sku, '1030112-009000-110', "sku ok");
 is ($item->variant_sku, '1030112-009000-110', "variant sku ok");
 is ($item->canonical_sku, '1030112', "canonical ok");
 
+is ($item->price, '19.90');
+is ($item->subtotal, '19.90');
+is ($order->shipping, '5.00');
+is ($item->remote_shop_order_item, '123498123394-9012349812343');
 done_testing;

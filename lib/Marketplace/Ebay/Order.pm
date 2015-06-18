@@ -7,7 +7,7 @@ use DateTime::Format::ISO8601;
 use Data::Dumper;
 
 use Moo;
-use MooX::Types::MooseLike::Base qw(Str HashRef);
+use MooX::Types::MooseLike::Base qw(Str HashRef Int);
 use Marketplace::Ebay::Order::Address;
 use Marketplace::Ebay::Order::Item;
 use namespace::clean;
@@ -101,10 +101,6 @@ sub _build_shipping_address {
 
 has items_ref => (is => 'lazy');
 
-sub orderline {
-    return shift->order->{TransactionArray}->{Transaction};
-}
-
 sub _build_items_ref {
     my ($self) = @_;
     my $orderline = $self->orderline;
@@ -114,6 +110,23 @@ sub _build_items_ref {
         push @items, Marketplace::Ebay::Order::Item->new(struct => $item);
     }
     return \@items;
+}
+
+
+has number_of_items => (is => 'lazy', isa => Int);
+
+sub _build_number_of_items {
+    my $self = shift;
+    my @items = $self->items;
+    my $total = 0;
+    foreach my $i (@items) {
+        $total += $i->quantity;
+    }
+    return $total;
+}
+
+sub orderline {
+    return shift->order->{TransactionArray}->{Transaction};
 }
 
 sub items {
@@ -134,6 +147,40 @@ sub first_name {
 }
 sub last_name {
     
+}
+
+sub shipping_additional_costs {
+    my $self = shift;
+    my $cost = 0;
+    if (my $shipping = $self->order->{ShippingServiceSelected}) {
+        if (my $num = $shipping->{ShippingServiceAdditionalCost}) {
+            $cost = $num->{_} || 0;
+        }
+    }
+    return sprintf('%.2f', $cost);
+}
+
+sub shipping_first_unit {
+    my $self = shift;
+    my $cost = 0;
+    if (my $shipping = $self->order->{ShippingServiceSelected}) {
+        if (my $num = $shipping->{ShippingServiceCost}) {
+            $cost = $num->{_} || 0;
+        }
+    }
+    return sprintf('%.2f', $cost);
+}
+
+sub shipping {
+    my $self = shift;
+    my $item_shipping = $self->shipping_first_unit;
+    if (my $additional = $self->shipping_additional_costs) {
+        if ($self->number_of_items > 1) {
+            my $others = $self->number_of_items - 1;
+            $item_shipping = $item_shipping + ($additional * $others);
+        }
+    }
+    return sprintf('%.2f', $item_shipping);
 }
 
 
