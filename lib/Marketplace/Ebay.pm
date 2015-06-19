@@ -13,6 +13,7 @@ use XML::Compile::Util qw/pack_type/;
 use Data::Dumper;
 # use XML::LibXML::Simple;
 use Marketplace::Ebay::Response;
+use Marketplace::Ebay::Order;
 
 use Moo;
 use MooX::Types::MooseLike::Base qw(:all);
@@ -24,11 +25,11 @@ Marketplace::Ebay - Making API calls to eBay (with XSD validation)
 
 =head1 VERSION
 
-Version 0.09
+Version 0.10
 
 =cut
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 =head1 SYNOPSIS
 
@@ -406,7 +407,8 @@ sub get_category_specifics {
 =head2 get_orders($number_of_days)
 
 Retrieve the last orders in the last number of days, defaulting to 7.
-Return a list of orders with the OrderArray.Order structures.
+Return a list of L<Marketplace::Ebay::Order> objects. You can access
+the raw structures with $object->order.
 
 =cut
 
@@ -428,7 +430,9 @@ sub get_orders {
         my $res = $obj->struct;
         if (exists $res->{OrderArray} and
             exists $res->{OrderArray}->{Order}) {
-            push @orders, @{$res->{OrderArray}->{Order}};
+            foreach my $ord (@{$res->{OrderArray}->{Order}}) {
+                push @orders, Marketplace::Ebay::Order->new(order => $ord);
+            }
         }
         $repeat = $res->{HasMoreOrders};
         $request->{Pagination}->{PageNumber}++;
