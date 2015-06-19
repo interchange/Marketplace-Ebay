@@ -199,7 +199,7 @@ sub shipping_first_unit {
     return sprintf('%.2f', $cost);
 }
 
-sub shipping {
+sub shipping_cost {
     my $self = shift;
     my $item_shipping = $self->shipping_first_unit;
     if (my $additional = $self->shipping_additional_costs) {

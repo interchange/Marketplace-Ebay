@@ -399,7 +399,7 @@ is ($item->canonical_sku, '1030112', "canonical ok");
 
 is ($item->price, '19.90');
 is ($item->subtotal, '19.90');
-is ($order->shipping, '5.00');
+is ($order->shipping_cost, '5.00');
 is ($order->total_cost, '24.90');
 is ($order->subtotal, '19.90');
 is ($order->payment_method, 'PayPal');
