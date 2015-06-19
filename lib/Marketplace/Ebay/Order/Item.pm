@@ -66,5 +66,21 @@ sub shipping {
     return 0; # not available in the item
 }
 
+sub is_shipped {
+    my $self = shift;
+    return $self->struct->{ShippedTime};
+}
+
+sub email {
+    return shift->struct->{Buyer}->{Email};
+}
+sub first_name {
+    return shift->struct->{Buyer}->{UserFirstName};
+}
+sub last_name {
+    return shift->struct->{Buyer}->{UserLastName};
+}
+
+
 1;
 

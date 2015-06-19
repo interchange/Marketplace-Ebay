@@ -7,7 +7,7 @@ use DateTime::Format::ISO8601;
 use Data::Dumper;
 
 use Moo;
-use MooX::Types::MooseLike::Base qw(Str HashRef Int);
+use MooX::Types::MooseLike::Base qw(Str HashRef Int Object);
 use Marketplace::Ebay::Order::Address;
 use Marketplace::Ebay::Order::Item;
 use namespace::clean;
@@ -125,6 +125,15 @@ sub _build_number_of_items {
     return $total;
 }
 
+has first_item => (is => 'lazy', isa => Object);
+
+sub _build_first_item {
+    my $self = shift;
+    my ($first, @rest) = $self->items;
+    die "Missing items in transaction!" unless $first;
+    return $first;
+}
+
 sub orderline {
     return shift->order->{TransactionArray}->{Transaction};
 }
@@ -135,19 +144,29 @@ sub items {
 }
 
 sub order_date {
-    
+    my $self = shift;
+    if (my $date = $self->order->{CreatedTime}) {
+        return DateTime::Format::ISO8601->parse_datetime($date);
+    }
+    return;
 }
 
 sub email {
-    
+    return shift->first_item->email;
 }
 
 sub first_name {
-    
+    return shift->first_item->first_name;
 }
 sub last_name {
-    
+    return shift->first_item->last_name;
 }
+
+sub comments {
+    my $self = shift;
+    return $self->order->{BuyerCheckoutMessage};
+}
+
 
 sub shipping_additional_costs {
     my $self = shift;
@@ -183,5 +202,58 @@ sub shipping {
     return sprintf('%.2f', $item_shipping);
 }
 
+sub total_cost {
+    my $self = shift;
+    my $total = 0;
+    if (my $amount = $self->order->{Total}) {
+        if (my $num = $amount->{_}) {
+            $total = $num;
+        }
+    }
+    return sprintf('%.2f', $total);
+}
+
+sub subtotal {
+    my $self = shift;
+    my @items = $self->items;
+    my $total = 0;
+    foreach my $i (@items) {
+        $total += $i->subtotal;
+    }
+    return sprintf('%.2f', $total);
+}
+
+sub currency {
+    my $self = shift;
+    if (my $currency = $self->order->{Total}->{currencyID}) {
+        return $currency;
+    }
+    else {
+        die "Can't find currency total! " . Dumper($self->order);
+    }
+}
+
+sub payment_method {
+    my $self = shift;
+    if (my $checkout = $self->order->{CheckoutStatus}) {
+        return $checkout->{PaymentMethod};
+    }
+    return;
+}
+
+sub order_is_shipped {
+    my $self = shift;
+    my $shipped;
+    foreach my $item ($self->items) {
+        if ($item->is_shipped) {
+            $shipped = 1;
+        }
+        else {
+            $shipped = 0;
+            last;
+        }
+    }
+    return $shipped;
+}
 
 1;
