@@ -73,6 +73,22 @@ sub can_be_imported {
     }
 }
 
+=head2 order_status
+
+Return the order status and the payment status, separated by a colon.
+
+=cut
+
+
+sub order_status {
+    my ($self) = @_;
+    my $order = $self->order;
+    my $order_status = $order->{OrderStatus} || 'Unknown';
+    my $payment_status = $order->{CheckoutStatus}->{Status} || 'Unknown';
+    return "$order_status: $payment_status";
+}
+
+
 =head2 ebay_order_number
 
 Ebay order id.

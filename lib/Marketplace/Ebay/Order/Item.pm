@@ -8,12 +8,12 @@ use strict;
 use warnings;
 
 use Moo;
-use MooX::Types::MooseLike::Base qw(HashRef);
+use MooX::Types::MooseLike::Base qw(HashRef Str);
 use Data::Dumper;
 use namespace::clean;
 
 has struct => (is => 'ro', isa => HashRef);
-has merchant_order_item => (is => 'rw', isa => HashRef);
+has merchant_order_item => (is => 'rw', isa => Str);
 
 sub sku {
     my $self = shift;
