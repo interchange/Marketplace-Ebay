@@ -156,10 +156,10 @@ sub email {
 }
 
 sub first_name {
-    return shift->first_item->first_name;
+    return shift->first_item->first_name || '';
 }
 sub last_name {
-    return shift->first_item->last_name;
+    return shift->first_item->last_name || '';
 }
 
 sub comments {
@@ -167,6 +167,15 @@ sub comments {
     return $self->order->{BuyerCheckoutMessage};
 }
 
+sub shipping_method {
+    my $self = shift;
+    if (my $shipping = $self->order->{ShippingServiceSelected}) {
+        if (my $service = $shipping->{ShippingService}) {
+            return $service;
+        }
+    }
+    return '';
+}
 
 sub shipping_additional_costs {
     my $self = shift;
