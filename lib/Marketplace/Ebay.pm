@@ -25,11 +25,11 @@ Marketplace::Ebay - Making API calls to eBay (with XSD validation)
 
 =head1 VERSION
 
-Version 0.11
+Version 0.12
 
 =cut
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 =head1 SYNOPSIS
 
@@ -106,6 +106,14 @@ has application_key => (is => 'ro', required => 1);
 has certificate_key => (is => 'ro', required => 1);
 has token =>           (is => 'ro', required => 1);
 has site_id =>         (is => 'ro', required => 1);
+has site_code => (is => 'lazy');
+
+sub _build_site_code {
+    my $self = shift;
+    my $code = $self->ebay_sites_id_to_name->{$self->site_id};
+    die $self->site_id . " doesn't map to a site name!" unless $code;
+    return $code;
+}
 
 # totally random, as per Net::eBay
 has compatibility_level => (is => 'ro',
@@ -441,6 +449,19 @@ sub get_orders {
     return @orders;
 }
 
+=head2 get_orders_for_site
+
+Like get_orders, but filter the orders by the site_id of the object
+(otherwise you pull the orders from all the international sites).
+
+=cut
+
+sub get_orders_for_site {
+    my ($self, $backlog) = @_;
+    my @orders = $self->get_orders($backlog);
+    my $name = $self->site_code;
+    return grep { $_->ebay_site eq $name } @orders;
+}
 
 =head2 ebay_sites_name_to_id
 

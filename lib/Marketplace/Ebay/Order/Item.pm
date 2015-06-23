@@ -80,7 +80,9 @@ sub first_name {
 sub last_name {
     return shift->struct->{Buyer}->{UserLastName};
 }
-
+sub ebay_site {
+    return shift->struct->{Item}->{Site};
+}
 
 1;
 

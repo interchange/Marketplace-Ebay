@@ -281,4 +281,31 @@ sub order_is_shipped {
     return $shipped;
 }
 
+=head2 ebay_site
+
+Return the site where the order was placed. We have to loop over all
+the items and check if they match. If they don't, we throw an
+exception.
+
+=cut
+
+sub ebay_site {
+    my $self = shift;
+    my $site;
+    foreach my $item ($self->items) {
+        my $item_site = $item->ebay_site;
+        die $item->sku . " has not a Site attached!" unless $item_site;
+        # if defined, check, otherwise assign;
+        if (defined $site) {
+            if ($site ne $item_site) {
+                die "Mismatch $site != $item_site on " . Dumper($self);
+            }
+        }
+        else {
+            $site = $item_site;
+        }
+    }
+    return $site;
+}
+
 1;
