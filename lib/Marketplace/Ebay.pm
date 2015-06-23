@@ -442,6 +442,67 @@ sub get_orders {
 }
 
 
+=head2 ebay_sites_name_to_id
+
+Return an hashref for mapping ebay site names and abbreviations to a numeric id.
+
+=head2 ebay_sites_id_to_name
+
+Return an hashref for mapping ebay site id to its name.
+# http://developer.ebay.com/devzone/XML/docs/Reference/ebay/types/SiteCodeType.html
+
+=cut
+
+sub ebay_site_code_types {
+    # http://developer.ebay.com/devzone/XML/docs/Reference/ebay/types/SiteCodeType.html
+    my %codes = (
+                 Australia  => { id => 15, abbreviation => "AU" },
+                 Austria  => { id => 16, abbreviation => "AT" },
+                 Belgium_Dutch  => { id => 123, abbreviation => "BENL" },
+                 Belgium_French  => { id => 23, abbreviation => "BEFR" },
+                 Canada  => { id => 2, abbreviation => "CA" },
+                 CanadaFrench  => { id => 210, abbreviation => "CAFR" },
+                 France  => { id => 71, abbreviation => "FR" },
+                 Germany  => { id => 77, abbreviation => "DE" },
+                 HongKong  => { id => 201, abbreviation => "HK" },
+                 India  => { id => 203, abbreviation => "IN" },
+                 Ireland  => { id => 205, abbreviation => "IE" },
+                 Italy  => { id => 101, abbreviation => "IT" },
+                 Malaysia  => { id => 207, abbreviation => "MY" },
+                 Netherlands  => { id => 146, abbreviation => "NL" },
+                 Philippines  => { id => 211, abbreviation => "PH" },
+                 Poland  => { id => 212, abbreviation => "PL" },
+                 Russia  => { id => 215, abbreviation => "RU" },
+                 Singapore  => { id => 216, abbreviation => "SG" },
+                 Spain  => { id => 186, abbreviation => "ES" },
+                 Switzerland  => { id => 193, abbreviation => "CH" },
+                 UK  => { id => 3, abbreviation => "UK" },
+                 US  => { id => 0, abbreviation => "US" },
+                );
+    return %codes;
+}
+
+sub ebay_sites_name_to_id {
+    my $self = shift;
+    my %out;
+    my %codes = $self->ebay_site_code_types;
+    foreach my $k (keys %codes) {
+        $out{$k} = $codes{$k}{id};
+        $out{$codes{$k}{abbreviation}} = $codes{$k}{id};
+    }
+    return \%out;
+}
+
+sub ebay_sites_id_to_name {
+    my $self = shift;
+    my %codes = $self->ebay_site_code_types;
+    my %out;
+    foreach my $k (keys %codes) {
+        $out{$codes{$k}{id}} = $k;
+    }
+    return \%out;
+}
+
 =head1 AUTHOR
 
 Marco Pessotto, C<< <melmothx at gmail.com> >>
