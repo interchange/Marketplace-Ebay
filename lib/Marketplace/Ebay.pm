@@ -48,6 +48,15 @@ our $VERSION = '0.12';
 
 L<http://developer.ebay.com/Devzone/XML/docs/Concepts/MakingACall.html>
 
+=head1 DESCRIPTION
+
+=head2 International Selling
+
+Products propagate from your local selling account to all Ebay sites
+where you are going to ship your items to:
+
+L<http://sellercentre.ebay.co.uk/advanced-international-selling>
+
 =head1 ACCESSORS
 
 =head2 Credentials
