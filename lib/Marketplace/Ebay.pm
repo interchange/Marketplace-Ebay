@@ -11,7 +11,7 @@ use XML::LibXML;
 use XML::Compile::Schema;
 use XML::Compile::Util qw/pack_type/;
 use Data::Dumper;
-# use XML::LibXML::Simple;
+use XML::LibXML::Simple;
 use Marketplace::Ebay::Response;
 use Marketplace::Ebay::Order;
 
@@ -25,11 +25,11 @@ Marketplace::Ebay - Making API calls to eBay (with XSD validation)
 
 =head1 VERSION
 
-Version 0.12
+Version 0.14
 
 =cut
 
-our $VERSION = '0.12';
+our $VERSION = '0.14';
 
 =head1 SYNOPSIS
 
@@ -178,10 +178,13 @@ failure inspecting, e.g.,
 
   $self->last_response->status_line;
 
-With option "requires_struct" set to a true value, the method doesn't
+With option C<requires_struct> set to a true value, the method doesn't
 return the object, but a plain hashref with the structure returned
 (old behaviour).
 
+With an option C<no_validate>, the XML is parsed using XMLin, not the
+schema, so the result could be unstable, but on the other hand, you
+get something out of XML which doesn't comply with the schema.
 
 =head2 prepare_xml($name, \%data)
 
@@ -209,7 +212,14 @@ sub api_call {
     $self->log_event("Retrieving $call response\n" . $response->as_string);
     $self->_set_last_parsed_response(undef);
     if ($response->is_success) {
-        if (my $struct = $self->_parse_response($call, $response->decoded_content)) {
+        my $struct;
+        if ($options->{no_validate}) {
+            $struct = XMLin($response->decoded_content);
+        }
+        else {
+            $struct = $self->_parse_response($call, $response->decoded_content)
+        }
+        if ($struct) {
             my $obj = Marketplace::Ebay::Response->new(struct => $struct);
             $self->_set_last_parsed_response($obj);
             $self->log_event("Got response:" . Dumper($struct));
