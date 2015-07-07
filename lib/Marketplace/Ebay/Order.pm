@@ -308,4 +308,16 @@ sub ebay_site {
     return $site;
 }
 
+=head2 username
+
+The ebay's username of the buyer.
+
+=cut
+
+sub username {
+    my $self = shift;
+    return $self->order->{BuyerUserID} || '';
+}
+
+
 1;

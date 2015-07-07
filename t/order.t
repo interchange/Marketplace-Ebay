@@ -412,4 +412,5 @@ is ($order->first_name, 'Pinco');
 is ($order->last_name, 'Pallino');
 is ($order->order_date->ymd, '2015-06-18');
 is ($order->shipping_method, 'DE_DHLPaket', "shipping method ok");
+is ($order->username, 'meeeeoowww', "username ok");
 done_testing;
