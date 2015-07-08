@@ -1,4 +1,4 @@
-MANIFEST.bak
+*.bak
 Makefile
 Makefile.old
 Build
