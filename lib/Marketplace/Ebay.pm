@@ -249,7 +249,7 @@ sub log_event {
     my ($self, @strings) = @_;
     if (my $file = $self->log_file) {
         open (my $fh, '>>', $file) or die "Cannot open $file $!";
-        my $now = "\n" . localtime . "\n";
+        my $now = "\n" . localtime() . "\n";
         print $fh $now, @strings;
         close $fh or die "Cannot close $file $!";
     }
