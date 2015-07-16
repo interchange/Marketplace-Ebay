@@ -1,5 +1,15 @@
 Revision history for Marketplace-Ebay
 
+0.16 Thu Jul 16 15:24:38 2015 CEST
+
+    [ENHANCEMENTS]
+
+    * Add payment status attribute to Order class (Marco Pessotto).
+
+    [BUG FIXES]
+
+    * Fix ambiguous use of localtime (Marco Pessotto, GH #1).
+
 0.15 Wed Jul  8 18:06:55 2015 CEST
 
-     * Initial CPAN release.
+    * Initial CPAN release.

@@ -2,7 +2,7 @@ NAME
     Marketplace::Ebay - Making API calls to eBay (with XSD validation)
 
 VERSION
-    Version 0.15
+    Version 0.16
 
 SYNOPSIS
       my $ebay = Marketplace::Ebay->new(
