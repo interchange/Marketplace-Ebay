@@ -51,9 +51,15 @@ sub shop_type {
 read-write accessor for the (shop) order number so you can set this
 while importing it.
 
+=head2 payment_status
+
+read-write accessor for the payment status, so the shop can set it
+while importing it.
+
 =cut
 
 has order_number => (is => 'rw', isa => Str);
+has payment_status => (is => 'rw', isa => Str);
 
 =head2 can_be_imported
 
