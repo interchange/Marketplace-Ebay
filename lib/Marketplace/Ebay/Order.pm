@@ -156,14 +156,33 @@ sub _build_first_item {
     return $first;
 }
 
+=head2 orderline
+
+An arrayref with the TransactionArray.Transaction structure. This is
+used internally by C<items>.
+
+=cut
+
 sub orderline {
     return shift->order->{TransactionArray}->{Transaction};
 }
+
+=head2 items
+
+Return a list of L<Marketplace::Ebay::Order::Item> objects.
+
+=cut
 
 sub items {
     my $self = shift;
     return @{ $self->items_ref };
 }
+
+=head2 order_date
+
+Return a DateTime object with the creation time of the order.
+
+=cut
 
 sub order_date {
     my $self = shift;
@@ -173,21 +192,54 @@ sub order_date {
     return;
 }
 
+=head2 email
+
+The email of the buyer. Given that this is provided per item, the
+first one is used.
+
+=cut
+
 sub email {
     return shift->first_item->email;
 }
 
+=head2 first_name
+
+The first name of the buyer, looked up from the first item.
+
+=cut
+
 sub first_name {
     return shift->first_item->first_name || '';
 }
+
+=head2 last_name
+
+The last name of the buyer, looked up from the first item.
+
+=cut
+
+
 sub last_name {
     return shift->first_item->last_name || '';
 }
+
+=head2 comments
+
+The BuyerCheckoutMessage's field of the order.
+
+=cut
 
 sub comments {
     my $self = shift;
     return $self->order->{BuyerCheckoutMessage};
 }
+
+=head2 shipping_method
+
+The order's ShippingServiceSelected.ShippingService value
+
+=cut
 
 sub shipping_method {
     my $self = shift;
@@ -198,6 +250,13 @@ sub shipping_method {
     }
     return '';
 }
+
+=head2 shipping_additional_costs
+
+The order's ShippingServiceSelected.ShippingServiceAdditionalCost
+value. I.e., the cost of the shipping for the other items ordered.
+
+=cut
 
 sub shipping_additional_costs {
     my $self = shift;
@@ -210,6 +269,13 @@ sub shipping_additional_costs {
     return sprintf('%.2f', $cost);
 }
 
+=head2 shipping_first_unit
+
+The order's ShippingServiceSelected.ShippingServiceCost value. This is
+the cost of the shipping for the first item.
+
+=cut
+
 sub shipping_first_unit {
     my $self = shift;
     my $cost = 0;
@@ -220,6 +286,13 @@ sub shipping_first_unit {
     }
     return sprintf('%.2f', $cost);
 }
+
+=head2 shipping_cost
+
+The total cost of the shipping. It is the C<shipping_first_unit> + the
+additional costs multiplied by the number of additional items.
+
+=cut
 
 sub shipping_cost {
     my $self = shift;
@@ -233,6 +306,12 @@ sub shipping_cost {
     return sprintf('%.2f', $item_shipping);
 }
 
+=head2 total_cost
+
+The total of the order, as reported by Ebay.
+
+=cut
+
 sub total_cost {
     my $self = shift;
     my $total = 0;
@@ -244,6 +323,12 @@ sub total_cost {
     return sprintf('%.2f', $total);
 }
 
+=head2 subtotal
+
+Sum of the subtotal of all items.
+
+=cut
+
 sub subtotal {
     my $self = shift;
     my @items = $self->items;
@@ -253,6 +338,12 @@ sub subtotal {
     }
     return sprintf('%.2f', $total);
 }
+
+=head2 currency
+
+The currency code of the order (looked up in the total).
+
+=cut
 
 sub currency {
     my $self = shift;
@@ -264,6 +355,12 @@ sub currency {
     }
 }
 
+=head2 payment_method
+
+The CheckoutStatus.PaymentMethod value of the order.
+
+=cut
+
 sub payment_method {
     my $self = shift;
     if (my $checkout = $self->order->{CheckoutStatus}) {
@@ -271,6 +368,12 @@ sub payment_method {
     }
     return;
 }
+
+=head2 order_is_shipped
+
+Return true if all the items are marked as shipped.
+
+=cut
 
 sub order_is_shipped {
     my $self = shift;
