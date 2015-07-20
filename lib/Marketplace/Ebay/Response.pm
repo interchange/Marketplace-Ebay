@@ -66,17 +66,34 @@ The API version of the remote site.
 
 The ItemID (if any) of the response
 
+=head2 ack
+
+The Ack key of the response (acknowledge)
+
 =head2 start_time
 
 The StartTime (if any) of the response (auction start time)
+
+=head2 start_time_dt
+
+The StartTime (if any) of the response (auction start time) as a
+DateTime object.
 
 =head2 end_time
 
 The EndTime (if any) of the response (auction end time)
 
+=head2 end_time_dt
+
+The EndTime (if any) as a DateTime object
+
 =head2 timestamp
 
 The timestamp of the response.
+
+=head2 timestamp_dt
+
+The timestamp of the response as a DateTime object.
 
 =head2 errors
 
@@ -86,6 +103,22 @@ The unmodified Errors structure
 
 A single string with the errors found in the response. If you need
 more detailed info, you have to inspect C<errors> yourself.
+
+=head2 is_failure
+
+Return true if the acknowledge says C<Failure> or C<PartialFailure>.
+
+=head2 is_warning
+
+Return true if the acknowledge says C<Warning>.
+
+=head2 request_ok
+
+Return true if the response was successful or just with warnings.
+
+=head2 sku
+
+The SKU key of the response data.
 
 =cut
 
