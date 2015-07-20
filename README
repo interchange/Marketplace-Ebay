@@ -2,7 +2,7 @@ NAME
     Marketplace::Ebay - Making API calls to eBay (with XSD validation)
 
 VERSION
-    Version 0.16
+    Version 0.17
 
 SYNOPSIS
       my $ebay = Marketplace::Ebay->new(
@@ -61,9 +61,16 @@ ACCESSORS
     You can get the HTTP::Response object of the last call using this
     accessor.
 
+  last_request
+    You can get the HTTP::Request object of the last call using this
+    accessor.
+
     last_parsed_response
     Return a Marketplace::Ebay::Response object (or undef on failure) out of
     the return value of the last `api_call'.
+
+    log_file
+    A filename where to log requests and responses.
 
 METHODS
   api_call($name, \%data, \%options)
@@ -89,6 +96,9 @@ METHODS
     Utility for development. Show the expected structure for the API call
     $call. The second argument is optional, and may be Request or Response,
     defaulting to Request.
+
+  log_event(@data)
+    Append the arguments to the `log_file', if it was defined.
 
 CONVENIENCE METHODS
   api_call_wrapper($call, $data, @ids)
@@ -129,6 +139,10 @@ CONVENIENCE METHODS
   get_orders_for_site
     Like get_orders, but filter the orders by the site_id of the object
     (otherwise you pull the orders from all the international sites).
+
+  ebay_site_code_types (internal)
+    http://developer.ebay.com/devzone/XML/docs/Reference/ebay/types/SiteCode
+    Type.html turned into an hashref to map the site name to an id.
 
   ebay_sites_name_to_id
     Return an hashref for mapping ebay site names and abbreviations to a

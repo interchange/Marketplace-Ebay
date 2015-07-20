@@ -1,5 +1,11 @@
 Revision history for Marketplace-Ebay
 
+0.17 Mon Jul 20 16:54:59 2015 CEST
+
+    [DOCUMENTATION]
+
+    * Add missing documentation for complete POD coverage (Marco Pessotto).
+
 0.16 Thu Jul 16 15:24:38 2015 CEST
 
     [ENHANCEMENTS]
