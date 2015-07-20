@@ -21,6 +21,15 @@ Items must implement the following methods:
 
 =item price
 
+From the Ebay documentation:
+
+The price of the order line item (transaction). This amount does not
+take into account shipping, sales tax, and other costs related to
+the order line item. If multiple units were purchased through a non-
+variation, fixed-price listing, consider this value the per-unit
+price. In this case, the TransactionPrice would be multiplied by the
+Transaction.QuantityPurchased value.
+
 =item subtotal
 
 =item remote_shop_order_item
@@ -97,12 +106,6 @@ sub quantity {
     return shift->struct->{QuantityPurchased};
 }
 
-# The price of the order line item (transaction). This amount does not
-# take into account shipping, sales tax, and other costs related to
-# the order line item. If multiple units were purchased through a non-
-# variation, fixed-price listing, consider this value the per-unit
-# price. In this case, the TransactionPrice would be multiplied by the
-# Transaction.QuantityPurchased value.
 sub price {
     my $self = shift;
     return sprintf('%.2f', $self->struct->{TransactionPrice}->{_});
