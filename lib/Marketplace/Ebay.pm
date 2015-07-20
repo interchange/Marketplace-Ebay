@@ -103,10 +103,19 @@ The version of API and XSD used. Please keep this in sync with the XSD.
 You can get the HTTP::Response object of the last call using this
 accessor.
 
+=head2 last_request
+
+You can get the HTTP::Request object of the last call using this
+accessor.
+
 =head3 last_parsed_response
 
 Return a L<Marketplace::Ebay::Response> object (or undef on failure)
 out of the return value of the last C<api_call>.
+
+=head3 log_file
+
+A filename where to log requests and responses.
 
 =cut
 
@@ -195,6 +204,10 @@ Create the XML document to send for the API call $name.
 Utility for development. Show the expected structure for the API call
 $call. The second argument is optional, and may be Request or
 Response, defaulting to Request.
+
+=head2 log_event(@data)
+
+Append the arguments to the C<log_file>, if it was defined.
 
 =cut
 
@@ -482,6 +495,11 @@ sub get_orders_for_site {
     return grep { $_->ebay_site eq $name } @orders;
 }
 
+=head2 ebay_site_code_types (internal)
+
+L<http://developer.ebay.com/devzone/XML/docs/Reference/ebay/types/SiteCodeType.html>
+turned into an hashref to map the site name to an id.
+
 =head2 ebay_sites_name_to_id
 
 Return an hashref for mapping ebay site names and abbreviations to a numeric id.
@@ -494,7 +512,7 @@ Return an hashref for mapping ebay site id to its name.
 =cut
 
 sub ebay_site_code_types {
-    # http://developer.ebay.com/devzone/XML/docs/Reference/ebay/types/SiteCodeType.html
+
     my %codes = (
                  Australia  => { id => 15, abbreviation => "AU" },
                  Austria  => { id => 16, abbreviation => "AT" },
