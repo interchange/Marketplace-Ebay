@@ -402,9 +402,10 @@ sub cancel_item {
 
 =head2 delete_sku_variations($sku, \@list_of_sku_variations)
 
-It uses ReviseFixedPriceItem to cancel variations of a given sku
-
-https://developer.ebay.com/DevZone/xml/docs/Reference/ebay/Samples/ReviseFixedPriceItem_variationsDeleteSKU_in_xml_xml.txt
+It uses ReviseFixedPriceItem to cancel variations of a given sku, not
+passing asking for a deletion, but instead setting the quantity to 0.
+This because deleting a variation is not possible if a purchase has
+been done against it.
 
 =cut
 
@@ -412,7 +413,7 @@ sub delete_sku_variations {
     my ($self, $sku, $list) = @_;
     die unless $sku && $list;
     my @delete = map { +{
-                         Delete => 1,
+                         Quantity => 0,
                          SKU => $_,
                         }  } @$list;
     my $data = {
