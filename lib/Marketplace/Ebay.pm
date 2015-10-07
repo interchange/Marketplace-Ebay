@@ -324,7 +324,46 @@ expecting invalid structures, you should use C<api_call> directly.
 Return the response object. If no response object is found, it will
 die.
 
+=head2 api_call_wrapper_silent($call, $data, @ids)
+
+Same as C<api_call_wrapper>, but do not emit "warn" on warnings. Just
+print them out. Also, do not print ids or fees.
+
 =cut
+
+sub api_call_wrapper_silent {
+    my ($self, $call, $data, @identifiers) = @_;
+    my $res = $self->api_call($call, $data);
+    my $message = $call;
+    if (@identifiers) {
+        $message .= " on " . join(' ', @identifiers);
+    }
+    if ($res) {
+        if ($res->request_ok) {
+            if ($res->is_success) {
+                print "$message OK\n";
+            }
+            elsif ($res->errors) {
+                print "$message:\n" . $res->errors_as_string;
+            }
+            else {
+                print "$message not a success but no errors found (OK?)\n";
+            }
+        }
+        elsif ($res->errors) {
+            warn "$message:\n" . $res->errors_as_string;
+        }
+        else {
+            die "$message: Nor success, nor errors!" . Dumper($res);
+        }
+    }
+    else {
+        die "No response found!" . $self->last_response->status_line
+          . "\n" . $self->last_response->content;
+    }
+    return $res;
+}
+
 
 sub api_call_wrapper {
     my ($self, $call, $data, @identifiers) = @_;
@@ -467,7 +506,8 @@ sub get_orders {
     my $repeat = 1;
     my @orders;
     do {
-        my $obj = $self->api_call_wrapper(GetOrders => $request);
+        # we use the silent variant because it's a known warning spammer.
+        my $obj = $self->api_call_wrapper_silent(GetOrders => $request);
         my $res = $obj->struct;
         if (exists $res->{OrderArray} and
             exists $res->{OrderArray}->{Order}) {
