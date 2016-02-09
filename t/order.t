@@ -29,7 +29,7 @@ my $struc = {
                                  'Street1' => 'Pixasdf.21',
                                  'Country' => 'DE',
                                  'CityName' => "Foou\x{fc}ren",
-                                 'Name' => 'Pinco Pallino',
+                                 'Name' => 'Pinco U. Pallino-Pinz',
                                  'StateOrProvince' => '',
                                  'Phone' => 'Invalid Request',
                                  'AddressOwner' => 'eBay',
@@ -385,7 +385,7 @@ is ($order->shop_type, 'ebay', "Fixed string for shop type");
 my $address = $order->shipping_address;
 is ($address->address1, 'Pixasdf.21');
 is ($address->address2, '' );
-is ($address->name, 'Pinco Pallino');
+is ($address->name, 'Pinco U. Pallino-Pinz');
 is ($address->city, "Foou\x{fc}ren");
 is ($address->state, '');
 is ($address->zip, '48499');
@@ -408,9 +408,12 @@ is ($item->remote_shop_order_item, '123498123394-9012349812343');
 ok (!$item->is_shipped);
 ok (!$order->order_is_shipped);
 is ($order->email,'pallino.pinco@net.hr');
-is ($order->first_name, 'Pinco');
-is ($order->last_name, 'Pallino');
+is ($order->first_name, 'Pinco U.', "first name ok");
+is ($order->last_name, 'Pallino-Pinz', "last name ok");
 is ($order->order_date->ymd, '2015-06-18');
 is ($order->shipping_method, 'DE_DHLPaket', "shipping method ok");
 is ($order->username, 'meeeeoowww', "username ok");
+$order = Marketplace::Ebay::Order->new(order => $struc, name_from_shipping_address => 0);
+is ($order->first_name, 'Pinco', "Legacy option works for first name");
+is ($order->last_name, 'Pallino', "Legacy option works for last name");
 done_testing;

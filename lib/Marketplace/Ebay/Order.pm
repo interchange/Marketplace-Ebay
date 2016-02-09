@@ -7,7 +7,7 @@ use DateTime::Format::ISO8601;
 use Data::Dumper;
 
 use Moo;
-use MooX::Types::MooseLike::Base qw(Str HashRef Int Object);
+use MooX::Types::MooseLike::Base qw(Str HashRef Int Object Bool);
 use Marketplace::Ebay::Order::Address;
 use Marketplace::Ebay::Order::Item;
 use namespace::clean;
@@ -45,6 +45,16 @@ has order => (is => 'ro', isa => HashRef, required => 1);
 sub shop_type {
     return 'ebay';
 }
+
+=head2 name_from_shipping_address
+
+By default, lookup the name from the shipping address. Defaults to
+true. Otherwise look it up from the first item. Prior to version 0.19,
+the name was looked up from the first item only.
+
+=cut
+
+has name_from_shipping_address => (is => 'ro', isa => Bool, default => sub { 1 });
 
 =head2 order_number
 
@@ -210,7 +220,13 @@ The first name of the buyer, looked up from the first item.
 =cut
 
 sub first_name {
-    return shift->first_item->first_name || '';
+    my $self = shift;
+    if ($self->name_from_shipping_address) {
+        return $self->first_last_from_shipping_address->{first_name};
+    }
+    else {
+        return $self->first_item->first_name || '';
+    }
 }
 
 =head2 last_name
@@ -221,7 +237,33 @@ The last name of the buyer, looked up from the first item.
 
 
 sub last_name {
-    return shift->first_item->last_name || '';
+    my $self = shift;
+    if ($self->name_from_shipping_address) {
+        return $self->first_last_from_shipping_address->{last_name};
+    }
+    else {
+        return $self->first_item->last_name || '';
+    }
+}
+
+has first_last_from_shipping_address => (is => 'lazy', isa => HashRef);
+
+sub _build_first_last_from_shipping_address {
+    my $self = shift;
+    my ($first_name, $last_name) = ('', '');
+    if (my $name = $self->shipping_address->name) {
+        if ($name =~ m/\s*(.+?)\s+([\w-]+)\s*$/) {
+            $first_name = $1;
+            $last_name = $2;
+        }
+        else {
+            ($first_name, $last_name) = split(/\s+/, $name, 2);
+        }
+    }
+    return {
+            first_name => $first_name,
+            last_name => $last_name,
+           };
 }
 
 =head2 comments

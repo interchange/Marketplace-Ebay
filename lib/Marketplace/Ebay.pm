@@ -117,6 +117,10 @@ out of the return value of the last C<api_call>.
 
 A filename where to log requests and responses.
 
+=head3 name_from_shipping_address
+
+Passed to L<Marketplace::Ebay::Order>. Defaults to true.
+
 =cut
 
 has developer_key =>   (is => 'ro', required => 1);
@@ -125,6 +129,7 @@ has certificate_key => (is => 'ro', required => 1);
 has token =>           (is => 'ro', required => 1);
 has site_id =>         (is => 'ro', required => 1);
 has site_code => (is => 'lazy');
+has name_from_shipping_address => (is => 'ro', isa => Bool, default => sub { 1 });
 
 sub _build_site_code {
     my $self = shift;
@@ -512,7 +517,8 @@ sub get_orders {
         if (exists $res->{OrderArray} and
             exists $res->{OrderArray}->{Order}) {
             foreach my $ord (@{$res->{OrderArray}->{Order}}) {
-                push @orders, Marketplace::Ebay::Order->new(order => $ord);
+                push @orders, Marketplace::Ebay::Order->new(order => $ord,
+                                                            name_from_shipping_address => $self->name_from_shipping_address);
             }
         }
         $repeat = $res->{HasMoreOrders};
