@@ -1,5 +1,16 @@
 Revision history for Marketplace-Ebay
 
+0.19 Tue Feb  9 12:20:15 2016 CET
+
+    [API CHANGES]
+
+    * Change behaviour of $order->first_name and $order->last_name
+      accessors (Marco Pessotto).
+
+    [ENHANCEMENTS]
+
+    * Add silent wrapper for API calls (Marco Pessotto).
+
 0.18 Wed Oct  7 09:22:15 2015 CEST
 
     [BUG FIXES]

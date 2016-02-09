@@ -4,7 +4,7 @@ NAME
 
 VERSION
 
-    Version 0.18
+    Version 0.19
 
 SYNOPSIS
 
@@ -91,6 +91,10 @@ ACCESSORS
 
     A filename where to log requests and responses.
 
+  name_from_shipping_address
+
+    Passed to Marketplace::Ebay::Order. Defaults to true.
+
 METHODS
 
  api_call($name, \%data, \%options)
@@ -136,6 +140,11 @@ CONVENIENCE METHODS
 
     Return the response object. If no response object is found, it will
     die.
+
+ api_call_wrapper_silent($call, $data, @ids)
+
+    Same as api_call_wrapper, but do not emit "warn" on warnings. Just
+    print them out. Also, do not print ids or fees.
 
  cancel_item($identifier, $id, $reason)
 
