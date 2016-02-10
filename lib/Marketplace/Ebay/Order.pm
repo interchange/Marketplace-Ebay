@@ -256,8 +256,9 @@ sub _build_first_last_from_shipping_address {
             $first_name = $1;
             $last_name = $2;
         }
-        else {
-            ($first_name, $last_name) = split(/\s+/, $name, 2);
+        elsif ($name =~ m/\s*(.+?)\s*$/) {
+            # nothing to split, so this is just the last name
+            $last_name = $1;
         }
     }
     return {

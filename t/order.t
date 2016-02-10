@@ -416,4 +416,11 @@ is ($order->username, 'meeeeoowww', "username ok");
 $order = Marketplace::Ebay::Order->new(order => $struc, name_from_shipping_address => 0);
 is ($order->first_name, 'Pinco', "Legacy option works for first name");
 is ($order->last_name, 'Pallino', "Legacy option works for last name");
+
+$struc->{ShippingAddress}->{Name} = 'Marco';
+
+$order = Marketplace::Ebay::Order->new(order => $struc);
+is ($order->first_name, '', "first name kinda ok");
+is ($order->last_name, 'Marco', 'last name ok');
+
 done_testing;
