@@ -231,11 +231,16 @@ sub api_call {
     $self->_set_last_parsed_response(undef);
     if ($response->is_success) {
         my $struct;
+        my $xml = $response->decoded_content;
+        if ($call eq 'GetOrders') {
+            # until they don't publish an updated xsd
+            $xml =~ s!<GuaranteedShipping>(false|true)</GuaranteedShipping>!!g;
+        }
         if ($options->{no_validate}) {
-            $struct = XMLin($response->decoded_content);
+            $struct = XMLin($xml);
         }
         else {
-            $struct = $self->_parse_response($call, $response->decoded_content)
+            $struct = $self->_parse_response($call, $xml);
         }
         if ($struct) {
             my $obj = Marketplace::Ebay::Response->new(struct => $struct);
