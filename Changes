@@ -1,5 +1,13 @@
 Revision history for Marketplace-Ebay
 
+0.191 Thu Aug 18 10:24:00 2016 CEST
+
+    * Ebay is using XSD version 981 for the Trading API on the server,
+      but doesn't release the XSD before next week. As this version
+      introduces a new field <GuaranteedShipping>, we needed to add
+      a work around to the module
+      (Marco Pessotto, Stefan Hornburg/Racke).
+
 0.19 Tue Feb  9 12:20:15 2016 CET
 
     [API CHANGES]
