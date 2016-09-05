@@ -267,6 +267,7 @@ sub is_error_code {
 
 sub has_error_code {
     my ($self, $code) = @_;
+    die "Missing argument" unless $code;
     if (my $errors = $self->errors) {
         if (ref($errors) eq 'ARRAY') {
             return scalar(grep { $_->{ErrorCode} eq $code } @$errors);

@@ -650,4 +650,8 @@ is_deeply($response->errors, $struct->{Errors}, "found errors");
 ok ($response->is_error_code('21919089'));
 ok ($response->has_error_code('21919089'));
 is ($response->errors_count, 2, "Two errors, but they have the same code");
+eval { $response->has_error_code() };
+ok $@, "Found error $@ with missing argument";
+eval { $response->is_error_code() };
+ok $@, "Found error $@ with missing argument";
 done_testing;
