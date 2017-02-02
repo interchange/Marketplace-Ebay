@@ -558,6 +558,7 @@ $response = Marketplace::Ebay::Response->new(struct => $struct);
 is_deeply($response->errors, $struct->{Errors}, "found errors");
 diag $response->errors_as_string;
 like $response->errors_as_string, qr/21919067/;
+is_deeply([$response->error_codes], [21919067]);
 like $response->errors_as_string, qr/Listing violates the Duplicate Listing policy/;
 like $response->errors_as_string, qr/This Listing is a duplicate of your item: Blab lbal bal/;
 

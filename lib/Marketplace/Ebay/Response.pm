@@ -113,6 +113,10 @@ all the errors reported have this code.
 Check if the error code passed as argument is present in the response
 and return the count of the matching errors.
 
+=head2 error_codes
+
+Return a plain list of error codes found in the response.
+
 =head2 errors_as_string
 
 A single string with the errors found in the response. If you need
@@ -275,6 +279,24 @@ sub has_error_code {
     }
     return 0;
 }
+
+sub error_codes {
+    my $self = shift;
+    my @out;
+    if (my $errors = $self->errors) {
+        if (ref($errors) eq 'ARRAY') {
+            foreach my $err (@$errors) {
+                if (ref($err) eq 'HASH') {
+                    if (my $code = $err->{ErrorCode}) {
+                        push @out, $code;
+                    }
+                }
+            }
+        }
+    }
+    return @out;
+}
+
 
 sub errors_as_string {
     my $self = shift;
