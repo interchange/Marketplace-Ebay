@@ -387,7 +387,7 @@ sub api_call_wrapper {
             print "$message OK\n";
         }
         elsif ($res->errors) {
-            warn "$message:\n" . $res->errors_as_string;
+            print "$message:\n" . $res->errors_as_string;
         }
         else {
             die "$message: Nor success, nor errors!" . Dumper($res);
