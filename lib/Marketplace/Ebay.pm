@@ -254,6 +254,10 @@ sub api_call {
             }
         }
     }
+    else {
+        warn sprintf("API call failed (%s): %s\n", $response->code, $response->message);
+    }
+
     return;
 }
 
