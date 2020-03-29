@@ -98,6 +98,14 @@ Set lazily by the class depending on the C<production> value.
 
 The version of API and XSD used. Please keep this in sync with the XSD.
 
+=head3 retries
+
+Number of retries for transient errors.
+
+=head3 retry_interval
+
+Time in seconds between retries.
+
 =head3 last_response
 
 You can get the HTTP::Response object of the last call using this
@@ -150,6 +158,9 @@ has last_response => (is => 'rwp');
 has last_parsed_response => (is => 'rwp');
 has last_request => (is => 'rwp');
 has log_file => (is => 'rw');
+
+has retries => (is => 'ro', default => sub { 3 });
+has retry_interval => (is => 'ro', default => sub { 0 });
 
 sub _build_endpoint {
     my $self = shift;
@@ -381,33 +392,52 @@ sub api_call_wrapper_silent {
 
 sub api_call_wrapper {
     my ($self, $call, $data, @identifiers) = @_;
-    my $res = $self->api_call($call, $data);
+    my $res;
     my $message = $call;
     if (@identifiers) {
         $message .= " on " . join(' ', @identifiers);
     }
-    if ($res) {
-        if ($res->is_success) {
-            print "$message OK\n";
-        }
-        elsif ($res->errors) {
-            print "$message:\n" . $res->errors_as_string;
+
+    my $retries = $self->retries;
+
+    for (my $try = 0; $try <= $retries; $try++) {
+        if ($res = $self->api_call($call, $data)) {
+            if ($res->is_success) {
+                print "$message OK\n";
+            }
+            elsif ($res->errors) {
+                print "$message:\n" . $res->errors_as_string;
+
+                if ($res->errors_count == 1) {
+                    my @error_codes = $res->error_codes;
+
+                    if ($res->is_transient_error($error_codes[0])) {
+                        warn "Transient error, retry?\n";
+                        next;
+                    }
+                }
+                return $res;
+            }
+            else {
+                die "$message: Nor success, nor errors!" . Dumper($res);
+            }
+
+            if (my $item_id = $res->item_id) {
+                print "$message: ebay id: $item_id\n";
+            }
+            my $fee = $res->total_listing_fee;
+            if (defined $fee) {
+                print "$message Fee is $fee\n";
+            }
+
+            return $res;
         }
         else {
-            die "$message: Nor success, nor errors!" . Dumper($res);
-        }
-        if (my $item_id = $res->item_id) {
-            print "$message: ebay id: $item_id\n";
-        }
-        my $fee = $res->total_listing_fee;
-        if (defined $fee) {
-            print "$message Fee is $fee\n";
+            die "No response found!" . $self->last_response->status_line
+                . "\n" . $self->last_response->content;
         }
     }
-    else {
-        die "No response found!" . $self->last_response->status_line
-          . "\n" . $self->last_response->content;
-    }
+
     return $res;
 }
 
