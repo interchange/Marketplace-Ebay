@@ -51,14 +51,16 @@ has struct => (is => 'ro',
 
 List of error codes which correspond to transient errors.
 
-10007 Sorry, something went wrong. Please wait a moment and try again. Sorry, something went wrong. Please wait a moment and try again.
+10007 Sorry, something went wrong. Please wait a moment and try again.
+
+21916803 Internal Application Error. Please try again after some time.
 
 =cut
 
 has transient_error_codes => (
     is => 'ro',
     isa => ArrayRef,
-    default => sub { [ 10007 ] },
+    default => sub { [ 10007, 21916803 ] },
 );
 
 =head1 SHORTCUTS
