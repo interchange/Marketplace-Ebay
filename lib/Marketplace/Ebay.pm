@@ -404,6 +404,9 @@ sub api_call_wrapper {
         if ($res = $self->api_call($call, $data)) {
             if ($res->is_success) {
                 print "$message OK\n";
+                if ($try > 1) {
+                    warn "Retry successful.\n";
+                }
             }
             elsif ($res->errors) {
                 print "$message:\n" . $res->errors_as_string;
