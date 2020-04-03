@@ -404,21 +404,23 @@ sub api_call_wrapper {
         if ($res = $self->api_call($call, $data)) {
             if ($res->is_success) {
                 print "$message OK\n";
-                if ($try > 1) {
-                    warn "Retry successful.\n";
+                if ($try > 0) {
+                    warn "$message: Retry successful.\n";
                 }
             }
             elsif ($res->errors) {
-                print "$message:\n" . $res->errors_as_string;
-
-                if ($res->errors_count == 1) {
+              if ($res->errors_count == 1) {
                     my @error_codes = $res->error_codes;
-
                     if ($res->is_transient_error($error_codes[0])) {
-                        warn "Transient error, retry?\n";
+                        warn "$message:\nTransient error, retrying\n";
+                        if ($self->retry_interval > 0) {
+                            sleep $self->retry_interval;
+                        }
                         next;
                     }
                 }
+
+                warn "$message:\n" . $res->errors_as_string;
                 return $res;
             }
             else {
