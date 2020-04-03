@@ -159,7 +159,7 @@ has last_parsed_response => (is => 'rwp');
 has last_request => (is => 'rwp');
 has log_file => (is => 'rw');
 
-has retries => (is => 'ro', default => sub { 3 });
+has retries => (is => 'ro', default => sub { 1 });
 has retry_interval => (is => 'ro', default => sub { 0 });
 
 sub _build_endpoint {
