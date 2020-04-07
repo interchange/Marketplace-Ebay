@@ -55,12 +55,14 @@ List of error codes which correspond to transient errors.
 
 21916803 Internal Application Error. Please try again after some time.
 
+21919062 We're having trouble updating your listing right now. Please try again later.
+
 =cut
 
 has transient_error_codes => (
     is => 'ro',
     isa => ArrayRef,
-    default => sub { [ 10007, 21916803 ] },
+    default => sub { [ 10007, 21916803, 21919062 ] },
 );
 
 =head1 SHORTCUTS
