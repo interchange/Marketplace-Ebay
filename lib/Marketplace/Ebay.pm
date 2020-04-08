@@ -162,6 +162,14 @@ has log_file => (is => 'rw');
 has retries => (is => 'ro', default => sub { 1 });
 has retry_interval => (is => 'ro', default => sub { 0 });
 
+# 599: Internal exception (e.g. Timed out while waiting for socket to become ready for reading)
+
+has transient_http_error_codes => (
+    is => 'ro',
+    isa => ArrayRef,
+    default => sub { [ 599 ] },
+);
+
 sub _build_endpoint {
     my $self = shift;
     if ($self->production) {
@@ -438,6 +446,14 @@ sub api_call_wrapper {
             return $res;
         }
         else {
+            my $http_error_code = $self->last_response->code;
+
+            if (grep { $_ == $http_error_code } @{$self->transient_http_error_codes}) {
+                warn sprintf ("Transient HTTP error %s in try %d status line: %s\n", $http_error_code, $try,  $self->last_response->status_line);
+                warn "Content: ", $self->last_response->content;
+                next;
+            }
+
             die "No response found!" . $self->last_response->status_line
                 . "\n" . $self->last_response->content;
         }
