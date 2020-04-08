@@ -162,7 +162,7 @@ has log_file => (is => 'rw');
 has retries => (is => 'ro', default => sub { 1 });
 has retry_interval => (is => 'ro', default => sub { 0 });
 
-# 599: Internal exception (e.g. Timed out while waiting for socket to become ready for reading)
+# 599: Internal exception (e.g. Timed out while waiting for socket to become ready for reading, SSL connection failed for api.ebay.com: SSL wants a read first)
 
 has transient_http_error_codes => (
     is => 'ro',
@@ -449,7 +449,7 @@ sub api_call_wrapper {
             my $http_error_code = $self->last_response->code;
 
             if (grep { $_ == $http_error_code } @{$self->transient_http_error_codes}) {
-                warn sprintf ("Transient HTTP error %s in try %d status line: %s\n", $http_error_code, $try,  $self->last_response->status_line);
+                warn sprintf ("%s: Transient HTTP error %s in try %d status line: %s\n", $message, $http_error_code, $try,  $self->last_response->status_line);
                 warn "Content: ", $self->last_response->content;
                 next;
             }
