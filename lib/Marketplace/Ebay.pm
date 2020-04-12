@@ -572,7 +572,7 @@ sub get_orders {
     my @orders;
     do {
         # we use the silent variant because it's a known warning spammer.
-        my $obj = $self->api_call_wrapper_silent(GetOrders => $request);
+        my $obj = $self->api_call_wrapper(GetOrders => $request);
         my $res = $obj->struct;
         if (exists $res->{OrderArray} and
             exists $res->{OrderArray}->{Order}) {
