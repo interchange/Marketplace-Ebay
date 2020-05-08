@@ -53,6 +53,8 @@ List of error codes which correspond to transient errors.
 
 10007 Sorry, something went wrong. Please wait a moment and try again.
 
+16100 The requested data is currently not available. The requested data is currently not available due to an eBay system error. Please try again later.
+
 21916803 Internal Application Error. Please try again after some time.
 
 21919062 We're having trouble updating your listing right now. Please try again later.
@@ -62,7 +64,7 @@ List of error codes which correspond to transient errors.
 has transient_error_codes => (
     is => 'ro',
     isa => ArrayRef,
-    default => sub { [ 10007, 21916803, 21919062 ] },
+    default => sub { [ 10007, 16100, 21916803, 21919062 ] },
 );
 
 =head1 SHORTCUTS
