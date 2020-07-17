@@ -27,6 +27,10 @@ Marketplace::Ebay::Response - Generic response parser for ebay api calls
       }
   }
 
+=head1 DESCRIPTION
+
+Reference for error codes: L<https://developer.ebay.com/devzone/xml/docs/Reference/ebay/Errors/errormessages.htm>
+
 =head1 ACCESSORS
 
 The constructor asks for a C<struct> key where the C<api_call> return
