@@ -81,7 +81,9 @@ L<https://developer.ebay.com/DevZone/merchandising/docs/Concepts/SiteIDToGlobalI
 
 Path to the XSD file with the eBay definitions.
 
-http://developer.ebay.com/webservices/latest/ebaySvc.xsd
+L<https://developer.ebay.com/webservices/latest/ebaySvc.xsd>.
+
+The current version of the XSD file as of 1st August 2020 is 1161.
 
 =head3 production
 
