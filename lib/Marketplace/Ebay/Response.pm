@@ -47,6 +47,25 @@ has struct => (is => 'ro',
                isa => HashRef,
                required => 1);
 
+=head2 transient_errors
+
+List of error codes which correspond to transient errors.
+
+10007 Sorry, something went wrong. Please wait a moment and try again.
+
+16100 The requested data is currently not available. The requested data is currently not available due to an eBay system error. Please try again later.
+
+21916803 Internal Application Error. Please try again after some time.
+
+21919062 We're having trouble updating your listing right now. Please try again later.
+
+=cut
+
+has transient_error_codes => (
+    is => 'ro',
+    isa => ArrayRef,
+    default => sub { [ 10007, 16100, 21916803, 21919062 ] },
+);
 
 =head1 SHORTCUTS
 
@@ -120,6 +139,10 @@ and return the count of the matching errors.
 =head2 error_codes
 
 Return a plain list of error codes found in the response.
+
+=head2 is_transient_error($code)
+
+Determine where error code C<$code> corresponds to a transient error.
 
 =head2 errors_as_string
 
@@ -301,6 +324,15 @@ sub error_codes {
     return @out;
 }
 
+sub is_transient_error {
+    my ($self, $code) = @_;
+
+    if (grep { $_ == $code } @{$self->transient_error_codes} ) {
+        return 1;
+    }
+
+    return 0;
+}
 
 sub errors_as_string {
     my $self = shift;

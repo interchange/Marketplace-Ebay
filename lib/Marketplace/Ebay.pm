@@ -98,6 +98,14 @@ Set lazily by the class depending on the C<production> value.
 
 The version of API and XSD used. Please keep this in sync with the XSD.
 
+=head3 retries
+
+Number of retries for transient errors.
+
+=head3 retry_interval
+
+Time in seconds between retries.
+
 =head3 last_response
 
 You can get the HTTP::Response object of the last call using this
@@ -150,6 +158,17 @@ has last_response => (is => 'rwp');
 has last_parsed_response => (is => 'rwp');
 has last_request => (is => 'rwp');
 has log_file => (is => 'rw');
+
+has retries => (is => 'ro', default => sub { 1 });
+has retry_interval => (is => 'ro', default => sub { 0 });
+
+# 599: Internal exception (e.g. Timed out while waiting for socket to become ready for reading, SSL connection failed for api.ebay.com: SSL wants a read first)
+
+has transient_http_error_codes => (
+    is => 'ro',
+    isa => ArrayRef,
+    default => sub { [ 599 ] },
+);
 
 sub _build_endpoint {
     my $self = shift;
@@ -254,6 +273,10 @@ sub api_call {
             }
         }
     }
+    else {
+        warn sprintf("API call failed (%s): %s\n", $response->code, $response->message);
+    }
+
     return;
 }
 
@@ -377,33 +400,65 @@ sub api_call_wrapper_silent {
 
 sub api_call_wrapper {
     my ($self, $call, $data, @identifiers) = @_;
-    my $res = $self->api_call($call, $data);
+    my $res;
     my $message = $call;
     if (@identifiers) {
         $message .= " on " . join(' ', @identifiers);
     }
-    if ($res) {
-        if ($res->is_success) {
-            print "$message OK\n";
-        }
-        elsif ($res->errors) {
-            print "$message:\n" . $res->errors_as_string;
+
+    my $retries = $self->retries;
+
+    for (my $try = 0; $try <= $retries; $try++) {
+        if ($res = $self->api_call($call, $data)) {
+            if ($res->is_success) {
+                print "$message OK\n";
+                if ($try > 0) {
+                    print "$message: Retry successful.\n";
+                }
+            }
+            elsif ($res->errors) {
+              if ($res->errors_count == 1) {
+                    my @error_codes = $res->error_codes;
+                    if ($res->is_transient_error($error_codes[0])) {
+                        print "$message:\nTransient error, retrying\n";
+                        if ($self->retry_interval > 0) {
+                            sleep $self->retry_interval;
+                        }
+                        next;
+                    }
+                }
+
+                warn "$message:\n" . $res->errors_as_string;
+                return $res;
+            }
+            else {
+                die "$message: Nor success, nor errors!" . Dumper($res);
+            }
+
+            if (my $item_id = $res->item_id) {
+                print "$message: ebay id: $item_id\n";
+            }
+            my $fee = $res->total_listing_fee;
+            if (defined $fee) {
+                print "$message Fee is $fee\n";
+            }
+
+            return $res;
         }
         else {
-            die "$message: Nor success, nor errors!" . Dumper($res);
-        }
-        if (my $item_id = $res->item_id) {
-            print "$message: ebay id: $item_id\n";
-        }
-        my $fee = $res->total_listing_fee;
-        if (defined $fee) {
-            print "$message Fee is $fee\n";
+            my $http_error_code = $self->last_response->code;
+
+            if (grep { $_ == $http_error_code } @{$self->transient_http_error_codes}) {
+                warn sprintf ("%s: Transient HTTP error %s in try %d status line: %s\n", $message, $http_error_code, $try,  $self->last_response->status_line);
+                warn "Content: ", $self->last_response->content;
+                next;
+            }
+
+            die "No response found!" . $self->last_response->status_line
+                . "\n" . $self->last_response->content;
         }
     }
-    else {
-        die "No response found!" . $self->last_response->status_line
-          . "\n" . $self->last_response->content;
-    }
+
     return $res;
 }
 
@@ -517,7 +572,7 @@ sub get_orders {
     my @orders;
     do {
         # we use the silent variant because it's a known warning spammer.
-        my $obj = $self->api_call_wrapper_silent(GetOrders => $request);
+        my $obj = $self->api_call_wrapper(GetOrders => $request);
         my $res = $obj->struct;
         if (exists $res->{OrderArray} and
             exists $res->{OrderArray}->{Order}) {
