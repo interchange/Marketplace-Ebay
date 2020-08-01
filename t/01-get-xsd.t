@@ -12,9 +12,8 @@ plan tests => 1;
 my $xsd = File::Spec->catfile(qw/t ebay.xsd/);
 my $url = 'https://developer.ebay.com/webservices/latest/ebaySvc.xsd';
 
-unless (-f $xsd) {
+if ( $ENV{RELEASE_TESTING} or ! -f $xsd ) {
     my $res = HTTP::Tiny->new->mirror($url, $xsd);
     die "Failed to retrieve XSD from $url: $res->{status} $res->{reason}: " unless $res->{success};
 }
 ok (-f $xsd, "$xsd found");
-
