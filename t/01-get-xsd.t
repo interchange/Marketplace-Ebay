@@ -1,4 +1,7 @@
 #!perl
+#
+# This tests downloads the latest XSD if the file t/ebay.xsd doesn't exist
+# or the RELEASE_TESTING environment variable is set.
 
 use strict;
 use warnings;
