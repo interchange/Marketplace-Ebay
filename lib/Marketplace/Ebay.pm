@@ -668,9 +668,11 @@ sub ebay_sites_id_to_name {
     return \%out;
 }
 
-=head1 AUTHOR
+=head1 AUTHORS
 
 Marco Pessotto, C<< <melmothx at gmail.com> >>
+
+Stefan Hornburg (Racke) C<< <racke@linuxia.de> >>,
 
 =head1 BUGS
 

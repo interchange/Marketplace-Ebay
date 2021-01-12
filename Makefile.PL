@@ -5,7 +5,10 @@ use ExtUtils::MakeMaker;
 
 WriteMakefile(
     NAME             => 'Marketplace::Ebay',
-    AUTHOR           => q{Marco Pessotto <melmothx@gmail.com>},
+    AUTHOR           => [
+        q{Marco Pessotto <melmothx@gmail.com>},
+        q{Stefan Hornburg (Racke) <racke@linuxia.de>},
+                     ],
     VERSION_FROM     => 'lib/Marketplace/Ebay.pm',
     ABSTRACT_FROM    => 'lib/Marketplace/Ebay.pm',
     LICENSE          => 'Perl_5',
