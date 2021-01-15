@@ -63,11 +63,17 @@ L<http://sellercentre.ebay.co.uk/advanced-international-selling>
 
 The following are required for a successful API call.
 
-=head3 developer_key
-
 =head3 application_key
 
+This is the App ID from your key set.
+
+=head3 developer_key
+
+This is the Dev ID from your key set.
+
 =head3 certificate_key
+
+This is the Cert ID from your key set.
 
 =head3 token
 
