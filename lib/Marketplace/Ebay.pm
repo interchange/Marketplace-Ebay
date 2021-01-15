@@ -680,48 +680,6 @@ Marco Pessotto, C<< <melmothx at gmail.com> >>
 
 Stefan Hornburg (Racke) C<< <racke@linuxia.de> >>,
 
-=head1 BUGS
-
-Please report any bugs or feature requests to C<bug-marketplace-ebay at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Marketplace-Ebay>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
-
-
-
-
-=head1 SUPPORT
-
-You can find documentation for this module with the perldoc command.
-
-    perldoc Marketplace::Ebay
-
-
-You can also look for information at:
-
-=over 4
-
-=item * RT: CPAN's request tracker (report bugs here)
-
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Marketplace-Ebay>
-
-=item * AnnoCPAN: Annotated CPAN documentation
-
-L<http://annocpan.org/dist/Marketplace-Ebay>
-
-=item * CPAN Ratings
-
-L<http://cpanratings.perl.org/d/Marketplace-Ebay>
-
-=item * Search CPAN
-
-L<http://search.cpan.org/dist/Marketplace-Ebay/>
-
-=back
-
-
-=head1 ACKNOWLEDGEMENTS
-
-
 =head1 LICENSE AND COPYRIGHT
 
 Copyright 2014 Marco Pessotto.
