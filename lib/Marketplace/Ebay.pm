@@ -682,7 +682,7 @@ Stefan Hornburg (Racke) C<< <racke@linuxia.de> >>,
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2014 Marco Pessotto.
+Copyright 2014-2021 Marco Pessotto, Stefan Hornburg (Racke).
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of either: the GNU General Public License as published
