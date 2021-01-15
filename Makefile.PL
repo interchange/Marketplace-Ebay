@@ -35,4 +35,10 @@ WriteMakefile(
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'Marketplace-Ebay-*' },
+    META_MERGE => {
+        resources => {
+            repository  => 'https://github.com/interchange/Marketplace-Ebay.git',
+            bugtracker => 'https://github.com/interchange/Marketplace-Ebay/issues',
+        }
+    },
 );
