@@ -309,19 +309,19 @@ sub has_error_code {
 
 sub error_codes {
     my $self = shift;
-    my @out;
+    my %out;
     if (my $errors = $self->errors) {
         if (ref($errors) eq 'ARRAY') {
             foreach my $err (@$errors) {
                 if (ref($err) eq 'HASH') {
                     if (my $code = $err->{ErrorCode}) {
-                        push @out, $code;
+                        $out{$code} = 1;
                     }
                 }
             }
         }
     }
-    return @out;
+    return keys %out;
 }
 
 sub is_transient_error {

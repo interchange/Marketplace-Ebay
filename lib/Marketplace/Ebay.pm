@@ -423,8 +423,9 @@ sub api_call_wrapper {
                 }
             }
             elsif ($res->errors) {
-              if ($res->errors_count == 1) {
-                    my @error_codes = $res->error_codes;
+                my @error_codes = $res->error_codes;
+                
+            if ($res->errors_count == 1) {
                     if ($res->is_transient_error($error_codes[0])) {
                         print "$message:\nTransient error, retrying\n";
                         if ($self->retry_interval > 0) {
@@ -433,8 +434,9 @@ sub api_call_wrapper {
                         next;
                     }
                 }
-
-                warn "$message:\n" . $res->errors_as_string;
+              unless (@error_codes == 1 and $error_codes[0] = '21920208') {
+                             warn "$message:\n" . $res->errors_as_string;
+            }
                 return $res;
             }
             else {
@@ -565,7 +567,7 @@ the raw structures with $object->order.
 
 sub get_orders {
     my ($self, $backlog) = @_;
-    $backlog ||= 7;
+    $backlog ||= 10;
     my $request = {
                    NumberOfDays => $backlog,
                    Pagination => {
